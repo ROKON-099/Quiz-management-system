@@ -1,0 +1,4 @@
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+export function ErrorBox({ children }) { return children ? <div className="mb-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700"><AlertCircle size={18} className="mt-0.5 shrink-0"/><span>{children}</span></div> : null; }
+export function SuccessBox({ children }) { return children ? <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700"><CheckCircle2 size={18}/>{children}</div> : null; }
+export function EmptyState({ title = "Nothing here yet", message = "There is no data to display." }) { return <div className="px-5 py-14 text-center"><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400"><AlertCircle size={22}/></div><h3 className="font-semibold text-slate-800">{title}</h3><p className="mt-1 text-sm text-slate-500">{message}</p></div>; }

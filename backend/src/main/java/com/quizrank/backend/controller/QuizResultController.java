@@ -1,0 +1,3 @@
+package com.quizrank.backend.controller;
+import com.quizrank.backend.entity.QuizResult;import com.quizrank.backend.repository.QuizResultRepository;import org.springframework.web.bind.annotation.*;import java.util.*;
+@RestController @RequestMapping("/api/quiz-results") public class QuizResultController {private final QuizResultRepository r;public QuizResultController(QuizResultRepository r){this.r=r;}@GetMapping("/student/{id}") public List<QuizResult> student(@PathVariable Integer id){return r.findByStudentIdOrderBySubmittedAtDesc(id);}@GetMapping("/quiz/{id}") public List<QuizResult> quiz(@PathVariable Integer id){return r.findByQuizIdOrderByScoreDesc(id);}}

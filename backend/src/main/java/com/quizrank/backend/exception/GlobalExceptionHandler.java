@@ -1,0 +1,3 @@
+package com.quizrank.backend.exception;
+import org.springframework.http.*;import org.springframework.web.bind.annotation.*;import java.util.*;
+@RestControllerAdvice public class GlobalExceptionHandler {@ExceptionHandler(NoSuchElementException.class) @ResponseStatus(HttpStatus.NOT_FOUND) public Map<String,String> notFound(Exception e){return Map.of("error",e.getMessage());}@ExceptionHandler(IllegalArgumentException.class) @ResponseStatus(HttpStatus.BAD_REQUEST) public Map<String,String> bad(Exception e){return Map.of("error",e.getMessage());}@ExceptionHandler(Exception.class) @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) public Map<String,String> other(Exception e){return Map.of("error","Internal server error");}}

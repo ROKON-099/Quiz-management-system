@@ -1,0 +1,4 @@
+import { Link } from "react-router-dom";
+import { ArrowLeft, UserPlus } from "lucide-react";
+import Brand from "../../components/common/Brand";
+export default function Register(){return <main className="flex min-h-screen items-center justify-center p-5"><div className="panel-card w-full max-w-lg p-8 text-center"><div className="mb-6 flex justify-center"><Brand/></div><div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600"><UserPlus size={26}/></div><h1 className="text-2xl font-bold text-slate-900">Account registration</h1><p className="mt-3 text-sm leading-6 text-slate-500">Student and teacher accounts are managed by the department. Please contact your department coordinator to get login credentials.</p><Link className="btn-primary mt-7 w-full" to="/login"><ArrowLeft size={17}/> Back to login</Link></div></main>}
