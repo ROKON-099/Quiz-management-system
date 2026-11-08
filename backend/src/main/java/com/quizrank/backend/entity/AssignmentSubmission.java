@@ -1,0 +1,6 @@
+package com.quizrank.backend.entity;
+import jakarta.persistence.*; import java.time.*;
+@Entity @Table(name="assignment_submissions",uniqueConstraints=@UniqueConstraint(columnNames={"assignment_id","student_id"})) public class AssignmentSubmission {
+ @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Integer id; @Column(name="assignment_id",nullable=false) private Integer assignmentId; @Column(name="student_id",nullable=false) private Integer studentId; @Column(name="file_name",nullable=false) private String fileName; @Column(name="stored_name",nullable=false) private String storedName; @Column(name="submitted_at",insertable=false,updatable=false) private LocalDateTime submittedAt;
+ public AssignmentSubmission(){} public Integer getId(){return id;} public Integer getAssignmentId(){return assignmentId;} public void setAssignmentId(Integer v){assignmentId=v;} public Integer getStudentId(){return studentId;} public void setStudentId(Integer v){studentId=v;} public String getFileName(){return fileName;} public void setFileName(String v){fileName=v;} public String getStoredName(){return storedName;} public void setStoredName(String v){storedName=v;} public LocalDateTime getSubmittedAt(){return submittedAt;}
+}

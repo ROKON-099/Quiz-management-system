@@ -1,0 +1,7 @@
+package com.quizrank.backend.service;
+import org.springframework.beans.factory.annotation.Value; import org.springframework.stereotype.Service; import org.springframework.web.multipart.MultipartFile; import java.io.*; import java.nio.file.*; import java.util.*;
+@Service public class UploadStorageService {
+ private final Path root; public UploadStorageService(@Value("${quizrank.upload-dir:uploads}") String dir){root=Paths.get(dir).toAbsolutePath().normalize();}
+ public String savePdf(MultipartFile file) throws IOException { if(file==null||file.isEmpty()) throw new IllegalArgumentException("Please select a PDF file."); String name=Objects.requireNonNullElse(file.getOriginalFilename(),"document.pdf"); if(!name.toLowerCase(Locale.ROOT).endsWith(".pdf")) throw new IllegalArgumentException("Only PDF files are allowed."); if(file.getSize()>10L*1024*1024) throw new IllegalArgumentException("PDF size must be 10 MB or less."); byte[] head=file.getBytes(); if(head.length<5||head[0]!='%'||head[1]!='P'||head[2]!='D'||head[3]!='F'||head[4]!='-') throw new IllegalArgumentException("The uploaded file is not a valid PDF."); Files.createDirectories(root); String stored=UUID.randomUUID()+".pdf"; Files.copy(new ByteArrayInputStream(head),root.resolve(stored)); return stored; }
+ public Path path(String stored){Path p=root.resolve(stored).normalize(); if(!p.startsWith(root)) throw new IllegalArgumentException("Invalid file path"); return p;}
+}
