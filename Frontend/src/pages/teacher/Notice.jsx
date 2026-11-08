@@ -2,18 +2,242 @@ import { useState } from "react";
 import { Bell, CalendarDays, Pencil, Plus, Trash2, X } from "lucide-react";
 import PageTitle from "../../components/common/PageTitle";
 import Loading from "../../components/common/Loading";
-import { EmptyState, ErrorBox, SuccessBox } from "../../components/common/Feedback";
+import {
+  EmptyState,
+  ErrorBox,
+  SuccessBox,
+} from "../../components/common/Feedback";
 import useAsync from "../../hooks/useAsync";
 import { useAuth } from "../../context/AuthContext";
-import { createNotice, deleteNotice, getTeacherNotices, updateNotice } from "../../services/noticeService";
+import {
+  createNotice,
+  deleteNotice,
+  getTeacherNotices,
+  updateNotice,
+} from "../../services/noticeService";
 import { displayDate, displayTime } from "../../utils/format";
 
-const blank={topic:"",message:"",quizDate:"",quizTime:"",subjectId:""};
-export default function Notice(){const {user}=useAuth();const teacherId=user?.id||user?.userId;const {data,loading,error,refetch}=useAsync(()=>getTeacherNotices(teacherId),[teacherId]);const [form,setForm]=useState(blank),[editing,setEditing]=useState(null),[modal,setModal]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[failure,setFailure]=useState("");
- function open(n){setEditing(n?.id||null);setForm(n?{topic:n.topic||"",message:n.message||"",quizDate:n.quizDate||"",quizTime:n.quizTime||"",subjectId:n.subjectId||""}:blank);setModal(true);setFailure("");}
- async function save(e){e.preventDefault();setBusy(true);setFailure("");setMessage("");try{const payload={...form,teacherId:Number(teacherId),subjectId:form.subjectId?Number(form.subjectId):null,quizDate:form.quizDate||null,quizTime:form.quizTime||null};if(editing)await updateNotice(editing,payload);else await createNotice(payload);setModal(false);setMessage(editing?"Notice updated successfully.":"Notice published successfully.");await refetch();}catch(err){setFailure(err.message)}finally{setBusy(false)}}
- async function remove(id){if(!window.confirm("Delete this notice?"))return;try{await deleteNotice(id);setMessage("Notice deleted.");refetch()}catch(e){setFailure(e.message)}}
- return <><PageTitle title="Notice Management" subtitle="Create, update and delete course announcements." action={<button onClick={()=>open()} className="btn-primary"><Plus size={17}/> Create Notice</button>}/><ErrorBox>{error||failure}</ErrorBox><SuccessBox>{message}</SuccessBox>{loading?<Loading/>:!data?.length?<div className="panel-card"><EmptyState title="No notices published" message="Create your first notice to inform students."/></div>:<div className="space-y-4">{data.map(n=><article key={n.id} className="panel-card p-5"><div className="flex flex-col gap-4 sm:flex-row"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600"><Bell size={20}/></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-semibold text-slate-900">{n.topic}</h2><p className="mt-1 text-xs text-slate-400">Published {displayDate(n.createdAt)}</p></div><div className="flex gap-2"><button onClick={()=>open(n)} className="icon-button text-indigo-600" aria-label="Edit notice"><Pencil size={17}/></button><button onClick={()=>remove(n.id)} className="icon-button text-rose-600" aria-label="Delete notice"><Trash2 size={17}/></button></div></div><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">{n.message}</p>{(n.quizDate||n.quizTime)&&<p className="mt-3 flex items-center gap-2 text-xs text-indigo-600"><CalendarDays size={14}/>{displayDate(n.quizDate)} · {displayTime(n.quizTime)}</p>}</div></div></article>)}</div>}
- {modal&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"><div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl"><div className="mb-5 flex items-center justify-between"><h2 className="text-lg font-bold text-slate-900">{editing?"Edit Notice":"Create Notice"}</h2><button onClick={()=>setModal(false)} className="icon-button"><X size={19}/></button></div><form onSubmit={save} className="space-y-4"><div><label className="field-label">Notice title</label><input className="field-input standalone" value={form.topic} onChange={e=>setForm({...form,topic:e.target.value})} required placeholder="e.g. Upcoming quiz announcement"/></div><div><label className="field-label">Message</label><textarea className="field-input standalone min-h-28" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} required placeholder="Write notice details..."/></div><div className="grid gap-4 sm:grid-cols-2"><div><label className="field-label">Quiz date (optional)</label><input type="date" className="field-input standalone" value={form.quizDate} onChange={e=>setForm({...form,quizDate:e.target.value})}/></div><div><label className="field-label">Quiz time (optional)</label><input type="time" className="field-input standalone" value={form.quizTime} onChange={e=>setForm({...form,quizTime:e.target.value})}/></div></div><ErrorBox>{failure}</ErrorBox><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={()=>setModal(false)} className="btn-secondary">Cancel</button><button disabled={busy} className="btn-primary">{busy?"Saving...":"Save Notice"}</button></div></form></div></div>}
- </>;
+const blank = {
+  topic: "",
+  message: "",
+  quizDate: "",
+  quizTime: "",
+  subjectId: "",
+};
+export default function Notice() {
+  const { user } = useAuth();
+  const teacherId = user?.id || user?.userId;
+  const { data, loading, error, refetch } = useAsync(
+    () => getTeacherNotices(teacherId),
+    [teacherId],
+  );
+  const [form, setForm] = useState(blank),
+    [editing, setEditing] = useState(null),
+    [modal, setModal] = useState(false),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState(""),
+    [failure, setFailure] = useState("");
+  function open(n) {
+    setEditing(n?.id || null);
+    setForm(
+      n
+        ? {
+            topic: n.topic || "",
+            message: n.message || "",
+            quizDate: n.quizDate || "",
+            quizTime: n.quizTime || "",
+            subjectId: n.subjectId || "",
+          }
+        : blank,
+    );
+    setModal(true);
+    setFailure("");
+  }
+  async function save(e) {
+    e.preventDefault();
+    setBusy(true);
+    setFailure("");
+    setMessage("");
+    try {
+      const payload = {
+        ...form,
+        teacherId: Number(teacherId),
+        subjectId: form.subjectId ? Number(form.subjectId) : null,
+        quizDate: form.quizDate || null,
+        quizTime: form.quizTime || null,
+      };
+      if (editing) await updateNotice(editing, payload);
+      else await createNotice(payload);
+      setModal(false);
+      setMessage(
+        editing
+          ? "Notice updated successfully."
+          : "Notice published successfully.",
+      );
+      await refetch();
+    } catch (err) {
+      setFailure(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function remove(id) {
+    if (!window.confirm("Delete this notice?")) return;
+    try {
+      await deleteNotice(id);
+      setMessage("Notice deleted.");
+      refetch();
+    } catch (e) {
+      setFailure(e.message);
+    }
+  }
+  return (
+    <>
+      <PageTitle
+        title="Notice Management"
+        subtitle="Create, update and delete course announcements."
+        action={
+          <button onClick={() => open()} className="btn-primary">
+            <Plus size={17} /> Create Notice
+          </button>
+        }
+      />
+      <ErrorBox>{error || failure}</ErrorBox>
+      <SuccessBox>{message}</SuccessBox>
+      {loading ? (
+        <Loading />
+      ) : !data?.length ? (
+        <div className="panel-card">
+          <EmptyState
+            title="No notices published"
+            message="Create your first notice to inform students."
+          />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {data.map((n) => (
+            <article key={n.id} className="panel-card p-5">
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                  <Bell size={20} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="font-semibold text-slate-900">
+                        {n.topic}
+                      </h2>
+                      <p className="mt-1 text-xs text-slate-400">
+                        Published {displayDate(n.createdAt)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => open(n)}
+                        className="icon-button text-indigo-600"
+                        aria-label="Edit notice"
+                      >
+                        <Pencil size={17} />
+                      </button>
+                      <button
+                        onClick={() => remove(n.id)}
+                        className="icon-button text-rose-600"
+                        aria-label="Delete notice"
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                    {n.message}
+                  </p>
+                  {(n.quizDate || n.quizTime) && (
+                    <p className="mt-3 flex items-center gap-2 text-xs text-indigo-600">
+                      <CalendarDays size={14} />
+                      {displayDate(n.quizDate)} · {displayTime(n.quizTime)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                {editing ? "Edit Notice" : "Create Notice"}
+              </h2>
+              <button onClick={() => setModal(false)} className="icon-button">
+                <X size={19} />
+              </button>
+            </div>
+            <form onSubmit={save} className="space-y-4">
+              <div>
+                <label className="field-label">Notice title</label>
+                <input
+                  className="field-input standalone"
+                  value={form.topic}
+                  onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                  required
+                  placeholder="e.g. Upcoming quiz announcement"
+                />
+              </div>
+              <div>
+                <label className="field-label">Message</label>
+                <textarea
+                  className="field-input standalone min-h-28"
+                  value={form.message}
+                  onChange={(e) =>
+                    setForm({ ...form, message: e.target.value })
+                  }
+                  required
+                  placeholder="Write notice details..."
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="field-label">Quiz date (optional)</label>
+                  <input
+                    type="date"
+                    className="field-input standalone"
+                    value={form.quizDate}
+                    onChange={(e) =>
+                      setForm({ ...form, quizDate: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Quiz time (optional)</label>
+                  <input
+                    type="time"
+                    className="field-input standalone"
+                    value={form.quizTime}
+                    onChange={(e) =>
+                      setForm({ ...form, quizTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <ErrorBox>{failure}</ErrorBox>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button disabled={busy} className="btn-primary">
+                  {busy ? "Saving..." : "Save Notice"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
