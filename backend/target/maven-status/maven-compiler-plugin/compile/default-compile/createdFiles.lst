@@ -7,6 +7,7 @@ com\quizrank\backend\exception\GlobalExceptionHandler.class
 com\quizrank\backend\entity\QuizResult.class
 com\quizrank\backend\repository\AssignmentRepository.class
 com\quizrank\backend\entity\LearningMaterial.class
+com\quizrank\backend\entity\AssignmentResult.class
 com\quizrank\backend\controller\LeaderboardController.class
 com\quizrank\backend\entity\Notice.class
 com\quizrank\backend\dto\CreateQuizRequest.class
@@ -14,11 +15,13 @@ com\quizrank\backend\repository\QuestionRepository.class
 com\quizrank\backend\entity\QuizAttempt.class
 com\quizrank\backend\repository\StudentCourseRepository.class
 com\quizrank\backend\controller\NoticeController.class
+com\quizrank\backend\dto\GradeAssignmentRequest.class
 com\quizrank\backend\entity\User$Role.class
 com\quizrank\backend\dto\LoginRequest.class
 com\quizrank\backend\repository\AssignmentSubmissionRepository.class
 com\quizrank\backend\dto\QuestionRequest.class
 com\quizrank\backend\repository\QuizAttemptRepository.class
+com\quizrank\backend\repository\AssignmentResultRepository.class
 com\quizrank\backend\repository\QuizAttemptAnswerRepository.class
 com\quizrank\backend\controller\QuizAttemptController.class
 com\quizrank\backend\dto\LoginResponse.class
@@ -36,10 +39,10 @@ com\quizrank\backend\repository\QuizRepository.class
 com\quizrank\backend\dto\UserResponse.class
 com\quizrank\backend\repository\UserRepository.class
 com\quizrank\backend\service\UserService.class
+com\quizrank\backend\entity\AssignmentResult$Grade.class
 com\quizrank\backend\entity\QuizAttemptAnswer.class
 com\quizrank\backend\config\CorsConfig.class
 com\quizrank\backend\entity\AcademicRecord.class
-com\quizrank\backend\dto\QuizResultRow.class
 com\quizrank\backend\controller\SubjectController.class
 com\quizrank\backend\controller\StudentCourseController.class
 com\quizrank\backend\controller\LearningResourceController.class

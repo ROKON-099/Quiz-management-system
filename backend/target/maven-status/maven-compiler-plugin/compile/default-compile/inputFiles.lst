@@ -13,14 +13,15 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\contr
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\UserController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\AnswerRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\CreateQuizRequest.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\GradeAssignmentRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\QuestionRequest.java
-C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\QuizResultRow.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\StudentQuestionResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\UserResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\AcademicRecord.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\Assignment.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\AssignmentResult.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\AssignmentSubmission.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\LearningMaterial.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\Notice.java
@@ -35,6 +36,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entit
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\exception\GlobalExceptionHandler.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\AcademicRecordRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\AssignmentRepository.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\AssignmentResultRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\AssignmentSubmissionRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\LearningMaterialRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\NoticeRepository.java

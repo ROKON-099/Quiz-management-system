@@ -34,7 +34,7 @@ import TeacherAssignments from "../pages/teacher/Assignments";
 
 // Class Notes Pages
 import StudentClassNotes from "../pages/student/ClassNotes";
-import TeacherClassNotes from "../pages/teacher/ClassNotes";
+import TeacherClassNotes from "../pages/teacher/ClassMaterials";
 
 export default function AppRoutes() {
   return (
