@@ -1,8 +1,17 @@
-import { BookOpen, ClipboardList, GraduationCap } from "lucide-react";
+
+
+import {
+  BookOpen,
+  ClipboardList,
+  GraduationCap,
+} from "lucide-react";
 
 import PageTitle from "../../components/common/PageTitle";
 import Loading from "../../components/common/Loading";
-import { EmptyState, ErrorBox } from "../../components/common/Feedback";
+import {
+  EmptyState,
+  ErrorBox,
+} from "../../components/common/Feedback";
 
 import useAsync from "../../hooks/useAsync";
 import { useAuth } from "../../context/AuthContext";
@@ -11,15 +20,14 @@ import { getStudentCourses } from "../../services/courseService";
 import { getQuizzes } from "../../services/quizService";
 import { getStudentResults } from "../../services/resultService";
 
+import Routine from "./Routine";
+
 export default function MyCourse() {
   const { user } = useAuth();
 
   const studentId = user?.id ?? user?.userId;
 
-  // ===============================
   // Fetch Student Courses
-  // ===============================
-
   const {
     data: courseData,
     loading: courseLoading,
@@ -29,20 +37,14 @@ export default function MyCourse() {
     [studentId]
   );
 
-  // ===============================
   // Fetch All Quizzes
-  // ===============================
-
   const {
     data: quizData,
     loading: quizLoading,
     error: quizError,
   } = useAsync(() => getQuizzes(), []);
 
-  // ===============================
   // Fetch Student Quiz Results
-  // ===============================
-
   const {
     data: resultData,
     loading: resultLoading,
@@ -52,18 +54,12 @@ export default function MyCourse() {
     [studentId]
   );
 
-  // ===============================
   // Loading
-  // ===============================
-
   if (courseLoading || quizLoading || resultLoading) {
     return <Loading />;
   }
 
-  // ===============================
   // Error Handling
-  // ===============================
-
   if (courseError || quizError || resultError) {
     return (
       <ErrorBox
@@ -77,40 +73,48 @@ export default function MyCourse() {
     );
   }
 
-  // ===============================
   // Normalize Courses
-  // ===============================
-
   const courses = (
     Array.isArray(courseData) ? courseData : []
   )
-    .map((item) => item.subject || item)
+    .map((item) => {
+      const subject = item.subject || item;
+
+      if (!subject) return null;
+
+      return {
+        ...subject,
+
+        courseCode:
+          subject.courseCode ||
+          subject.code ||
+          subject.subjectCode ||
+          "",
+
+        name:
+          subject.name ||
+          subject.subjectName ||
+          subject.courseName ||
+          "Unnamed Course",
+      };
+    })
     .filter(Boolean);
 
-  // ===============================
   // Normalize Quizzes
-  // ===============================
-
   const quizzes = Array.isArray(quizData)
     ? quizData
     : Array.isArray(quizData?.quizzes)
-    ? quizData.quizzes
-    : [];
+      ? quizData.quizzes
+      : [];
 
-  // ===============================
   // Normalize Results
-  // ===============================
-
   const results = Array.isArray(resultData)
     ? resultData
     : Array.isArray(resultData?.results)
-    ? resultData.results
-    : [];
+      ? resultData.results
+      : [];
 
-  // ===============================
   // Calculate Course Statistics
-  // ===============================
-
   const courseStats = courses.map((course) => {
     const courseId = Number(course.id);
 
@@ -148,10 +152,7 @@ export default function MyCourse() {
     };
   });
 
-  // ===============================
   // Summary Statistics
-  // ===============================
-
   const totalCourses = courseStats.length;
 
   const totalQuizzes = courseStats.reduce(
@@ -164,27 +165,21 @@ export default function MyCourse() {
     0
   );
 
-  // ===============================
-  // UI
-  // ===============================
-
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <PageTitle
         title="My Courses"
         subtitle="View your enrolled courses and quiz performance"
       />
 
-      {/* ===========================
-          Summary Cards
-      =========================== */}
-
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Total Courses */}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        {/* Total Courses */}
+        <div className="rounded-2xl border border-[#dceee5] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
+            <div className="rounded-xl bg-[#d0fae5] p-3 text-[#006045]">
               <BookOpen size={24} />
             </div>
 
@@ -193,7 +188,7 @@ export default function MyCourse() {
                 Total Courses
               </p>
 
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-900">
                 {totalCourses}
               </h2>
             </div>
@@ -201,10 +196,9 @@ export default function MyCourse() {
         </div>
 
         {/* Total Quizzes */}
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#dceee5] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-purple-100 p-3 text-purple-600">
+            <div className="rounded-xl bg-[#d0fae5] p-3 text-[#006045]">
               <ClipboardList size={24} />
             </div>
 
@@ -213,7 +207,7 @@ export default function MyCourse() {
                 Total Quizzes
               </p>
 
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-900">
                 {totalQuizzes}
               </h2>
             </div>
@@ -221,10 +215,9 @@ export default function MyCourse() {
         </div>
 
         {/* Attempted Quizzes */}
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#dceee5] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-green-100 p-3 text-green-600">
+            <div className="rounded-xl bg-[#d0fae5] p-3 text-[#006045]">
               <GraduationCap size={24} />
             </div>
 
@@ -233,7 +226,7 @@ export default function MyCourse() {
                 Attempted Quizzes
               </p>
 
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-900">
                 {totalAttempted}
               </h2>
             </div>
@@ -241,13 +234,12 @@ export default function MyCourse() {
         </div>
       </div>
 
-      {/* ===========================
-          Course Table
-      =========================== */}
+      {/* Enrolled Courses Table */}
+      <div className="overflow-hidden rounded-2xl border border-[#cfe6d9] bg-white shadow-sm">
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-6 py-5">
-          <h2 className="text-lg font-semibold text-slate-800">
+        {/* Table Header */}
+        <div className="border-b border-[#dceee5] bg-[#f2fbf6] px-5 py-5 sm:px-6">
+          <h2 className="text-lg font-semibold text-[#006045]">
             Enrolled Courses
           </h2>
 
@@ -261,116 +253,108 @@ export default function MyCourse() {
             <EmptyState message="No courses found" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[850px] table-auto text-left text-sm">
+
+              {/* Table Head */}
+              <thead className="bg-[#006045] text-xs uppercase tracking-wider text-white">
                 <tr>
-                  <th className="px-6 py-4">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4">
                     Serial
                   </th>
 
-                  <th className="px-6 py-4">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4">
                     Course Name
                   </th>
 
-                  <th className="px-6 py-4">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4">
                     Course Code
                   </th>
 
-                  <th className="px-6 py-4 text-center">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4 text-center">
                     Total Quiz
                   </th>
 
-                  <th className="px-6 py-4 text-center">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4 text-center">
                     Attempted
                   </th>
 
-                  <th className="px-6 py-4 text-center">
+                  <th className="whitespace-nowrap border border-[#dceee5]/30 px-5 py-4 text-center">
                     Result Avg
                   </th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              {/* Table Body */}
+              <tbody className="bg-[#f8fdf9]">
+
                 {courseStats.map((course, index) => (
                   <tr
                     key={course.id}
-                    className="transition hover:bg-slate-50"
+                    className="border-b border-[#dceee5] last:border-b-0"
                   >
                     {/* Serial */}
-
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4 font-medium text-slate-600">
                       {index + 1}
                     </td>
 
                     {/* Course Name */}
-
-                    <td className="px-6 py-4">
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#d0fae5] text-[#006045]">
                           <BookOpen size={18} />
                         </div>
 
-                        <span className="font-medium text-slate-800">
-                          {course.name ||
-                            course.subjectName ||
-                            "Unnamed Course"}
+                        <span className="font-semibold text-slate-800">
+                          {course.name}
                         </span>
                       </div>
                     </td>
 
-                    {/* Course Code */}
-
-                    <td className="px-6 py-4 text-slate-600">
-                      {course.code ||
-                        course.subjectCode ||
-                        "N/A"}
+                    {/* Course Code - Single Line */}
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4">
+                      <span className="inline-flex whitespace-nowrap rounded-lg border border-[#c6e9d5] bg-[#e9f9ef] px-3 py-2 text-xs font-bold tracking-wide text-[#006045]">
+                        {course.courseCode || "N/A"}
+                      </span>
                     </td>
 
                     {/* Total Quiz */}
-
-                    <td className="px-6 py-4 text-center">
-                      <span className="rounded-full bg-purple-50 px-3 py-1 font-medium text-purple-700">
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4 text-center">
+                      <span className="inline-flex min-w-9 items-center justify-center rounded-full bg-[#d0fae5] px-3 py-1 font-semibold text-[#006045]">
                         {course.totalQuiz}
                       </span>
                     </td>
 
                     {/* Attempted Quiz */}
-
-                    <td className="px-6 py-4 text-center">
-                      <span className="rounded-full bg-blue-50 px-3 py-1 font-medium text-blue-700">
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4 text-center">
+                      <span className="inline-flex min-w-9 items-center justify-center rounded-full bg-[#d0fae5] px-3 py-1 font-semibold text-[#006045]">
                         {course.attemptedQuiz}
                       </span>
                     </td>
 
                     {/* Average Result */}
-
-                    <td className="px-6 py-4 text-center">
+                    <td className="whitespace-nowrap border border-[#dceee5] px-5 py-4 text-center">
                       {course.average !== null ? (
-                        <span
-                          className={`rounded-full px-3 py-1 font-semibold ${
-                            course.average >= 80
-                              ? "bg-green-100 text-green-700"
-                              : course.average >= 50
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
+                        <span className="inline-flex rounded-full border border-[#c6e9d5] bg-[#e9f9ef] px-3 py-1.5 font-bold text-[#006045]">
                           {course.average.toFixed(2)}%
                         </span>
                       ) : (
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-500">
+                        <span className="inline-flex whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500">
                           Not Attempted
                         </span>
                       )}
                     </td>
                   </tr>
                 ))}
+
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Student Weekly Routine */}
+      <Routine courses={courseStats} />
     </div>
   );
 }

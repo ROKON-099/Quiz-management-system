@@ -21,6 +21,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\L
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\ManualCompareRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\QuestionRequest.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\QuizResultResponseDTO.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\StudentQuestionResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\UserResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\AcademicRecord.java

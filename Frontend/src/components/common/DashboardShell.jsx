@@ -1,5 +1,8 @@
+
 import { useState, useEffect, useRef } from "react";
+
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+
 import {
   BookOpen,
   Bell,
@@ -13,7 +16,6 @@ import {
   Menu,
   Trophy,
   X,
-  Layers3,
   ChevronDown,
   UserRound,
   PanelLeftClose,
@@ -21,16 +23,18 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
+
 import { fullName, userId } from "../../utils/format";
+import quizRankLogo from "../../assets/Logo.png";
 
 const studentLinks = [
   ["Overview", "/student/dashboard", LayoutDashboard],
   ["My Courses", "/student/my-course", BookOpen],
   ["Course & Study Management", "/student/notice", Bell],
   ["Assignments", "/student/assignments", FileText],
-  ["Similarity Reports", "/student/similarity-reports", ScanSearch],
   ["Leaderboard", "/leaderboard", Trophy],
 ];
+
 const teacherLinks = [
   ["Overview", "/teacher/dashboard", LayoutDashboard],
   ["My Courses", "/teacher/my-course", BookOpen],
@@ -38,7 +42,7 @@ const teacherLinks = [
   ["Course & Study Management", "/teacher/notice", BookOpen],
   ["Assignments", "/teacher/assignments", FileText],
   ["Plagiarism Check", "/teacher/plagiarism", ScanSearch],
-  ["Class Notes", "/teacher/class-notes", NotebookPen],
+  
   ["Student Results", "/teacher/results", ChartNoAxesCombined],
   ["Leaderboard", "/leaderboard", Trophy],
 ];
@@ -52,7 +56,9 @@ export default function DashboardShell({ role }) {
   });
 
   const profileRef = useRef(null);
+
   const { user, logout } = useAuth();
+
   const navigate = useNavigate();
 
   const links = role === "TEACHER" ? teacherLinks : studentLinks;
@@ -101,7 +107,9 @@ export default function DashboardShell({ role }) {
   function signOut() {
     setProfileOpen(false);
     setMobileOpen(false);
+
     logout();
+
     navigate("/login", { replace: true });
   }
 
@@ -120,9 +128,11 @@ export default function DashboardShell({ role }) {
               : "gap-3 px-5"
           }`}
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-100">
-            <Layers3 size={21} />
-          </span>
+          <img
+  src={quizRankLogo}
+  alt="QuizRank Logo"
+  className="h-11 w-11 shrink-0 object-contain"
+/>
 
           {!isCollapsed && (
             <div>
@@ -191,6 +201,7 @@ export default function DashboardShell({ role }) {
             }`}
           >
             <LogOut size={18} />
+
             {!isCollapsed && "Sign out"}
           </button>
 
@@ -353,6 +364,7 @@ export default function DashboardShell({ role }) {
                     <LogOut size={18} />
                     Sign out
                   </button>
+
                 </div>
               </div>
             )}
@@ -365,9 +377,10 @@ export default function DashboardShell({ role }) {
         </main>
 
         {/* Footer */}
-        <footer className="px-6 pb-6 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} QuizRank. Built for better learning.
+        <footer className="px-6 pb-6 text-center text-lg text-green-800">
+          © {new Date().getFullYear()} QuizRank.Developed by 3DEV.
         </footer>
+
       </div>
     </div>
   );

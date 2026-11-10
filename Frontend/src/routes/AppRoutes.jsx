@@ -21,8 +21,8 @@ import StudentProfile from "../pages/student/Profile";
 import StudentQuiz from "../pages/student/Quiz";
 import StudentResult from "../pages/student/Result";
 import StudentAssignments from "../pages/student/Assignments";
-import StudentSimilarityReports from "../pages/student/SimilarityReports";
-import StudentClassNotes from "../pages/student/ClassNotes";
+
+
 
 // Teacher Pages
 import TeacherDashboard from "../pages/teacher/Dashboard";
@@ -33,7 +33,7 @@ import CreateQuiz from "../pages/teacher/CreateQuiz";
 import TeacherResults from "../pages/teacher/Results";
 import TeacherAssignments from "../pages/teacher/Assignments";
 import TeacherPlagiarism from "../pages/teacher/Plagiarism";
-import TeacherClassNotes from "../pages/teacher/ClassMaterials";
+
 
 export default function AppRoutes() {
   return (
@@ -86,15 +86,8 @@ export default function AppRoutes() {
             element={<StudentAssignments />}
           />
 
-          <Route
-            path="similarity-reports"
-            element={<StudentSimilarityReports />}
-          />
+          
 
-          <Route
-            path="class-notes"
-            element={<StudentClassNotes />}
-          />
 
           <Route
             path="profile"
@@ -150,11 +143,7 @@ export default function AppRoutes() {
             element={<TeacherPlagiarism />}
           />
 
-          <Route
-            path="class-notes"
-            element={<TeacherClassNotes />}
-          />
-
+          
           <Route
             path="create-quiz"
             element={<CreateQuiz />}

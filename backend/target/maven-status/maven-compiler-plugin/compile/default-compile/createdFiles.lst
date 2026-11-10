@@ -45,6 +45,7 @@ com\quizrank\backend\controller\AcademicRecordController.class
 com\quizrank\backend\entity\AssignmentSubmission.class
 com\quizrank\backend\repository\QuizRepository.class
 com\quizrank\backend\dto\UserResponse.class
+com\quizrank\backend\dto\QuizResultResponseDTO.class
 com\quizrank\backend\repository\UserRepository.class
 com\quizrank\backend\service\UserService.class
 com\quizrank\backend\entity\AssignmentResult$Grade.class

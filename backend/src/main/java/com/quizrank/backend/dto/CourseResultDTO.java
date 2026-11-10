@@ -7,17 +7,20 @@ public class CourseResultDTO {
     private Integer score;
     private Integer total;
     private Double percentage;
+    private String studentName;
 
     public CourseResultDTO(
             Integer courseId,
             Integer quizId,
             Integer score,
-            Integer total
+            Integer total,
+            String studentName
     ) {
         this.courseId = courseId;
         this.quizId = quizId;
         this.score = score;
         this.total = total;
+        this.studentName = studentName;
 
         this.percentage = total != null && total > 0
                 ? (score * 100.0) / total
@@ -42,5 +45,9 @@ public class CourseResultDTO {
 
     public Double getPercentage() {
         return percentage;
+    }
+
+    public String getStudentName() {
+        return studentName;
     }
 }
