@@ -1,18 +1,14 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
-  Activity,
-  BookOpen,
   Eye,
   EyeOff,
   LoaderCircle,
   LockKeyhole,
   LogIn,
-  Trophy,
   UserRound,
 } from "lucide-react";
-import Brand from "../../components/common/Brand";
+
 import quizRankLogo from "../../assets/Logo.png";
 import { useAuth } from "../../context/AuthContext";
 import { ErrorBox } from "../../components/common/Feedback";
@@ -23,171 +19,166 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
+
   const { login, loading } = useAuth();
   const navigate = useNavigate();
 
   async function submit(e) {
     e.preventDefault();
     setError("");
+
     try {
       const user = await login(userId.trim(), password);
-      if (user.role === "STUDENT")
+
+      if (user.role === "STUDENT") {
         navigate("/student/dashboard", { replace: true });
-      else if (user.role === "TEACHER")
+      } else if (user.role === "TEACHER") {
         navigate("/teacher/dashboard", { replace: true });
-      else setError("Unknown account role. Please contact your department.");
+      } else {
+        setError(
+          "Unknown account role. Please contact your department."
+        );
+      }
     } catch (err) {
       setError(err.message || "Invalid ID or password.");
     }
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#e8eaff_0%,_#f7f8fc_42%,_#f7f8fc_100%)] px-4 py-8">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_24px_80px_rgba(37,48,89,.12)] md:grid-cols-2">
-        <section className="relative hidden min-h-[650px] overflow-hidden bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#10b981] p-10 text-white md:flex md:flex-col md:justify-between">
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
-          <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-violet-300/10" />
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f8fc] px-4 py-8 sm:px-6">
 
-          <div className="relative">
-            <Brand light />
-          </div>
+      {/* Login Container */}
+      <div className="w-full max-w-[550px] rounded-2xl border border-slate-100 bg-white px-6 py-8 shadow-[0_15px_60px_rgba(37,48,89,0.08)] sm:px-10 sm:py-10 md:px-12">
 
-          <div className="relative">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-indigo-100">
-              <Activity size={14} /> Learn. Practice. Compete.
-            </p>
-            <h1 className="max-w-md text-4xl font-extrabold leading-tight">
-              Test your knowledge.
-              <br />
-              Track your progress.
-            </h1>
-            <p className="mt-5 max-w-sm leading-7 text-indigo-100">
-              Practice with course quizzes, compete with your classmates and
-              follow your academic journey.
-            </p>
-          </div>
+        {/* QuizRank Logo */}
+        <div className="mb-6 flex justify-center">
+          <img
+            src={quizRankLogo}
+            alt="QuizRank Logo"
+            className="h-20 w-20 object-contain sm:h-24 sm:w-24"
+          />
+        </div>
 
-          <div className="relative flex flex-wrap gap-6 text-sm text-indigo-100">
-            <span className="flex items-center gap-2">
-              <BookOpen size={17} /> Courses
-            </span>
-            <span className="flex items-center gap-2">
-              <Trophy size={17} /> Leaderboard
-            </span>
-            <span className="flex items-center gap-2">
-              <Activity size={17} /> Progress
-            </span>
-          </div>
-        </section>
+        {/* Heading */}
+        <div className="mb-8 text-center">
+          <p className="text-sm font-semibold tracking-wide text-[#059669]">
+            WELCOME BACK
+          </p>
 
-        <section className="p-7 sm:p-10 md:p-12">
-          <div className="mb-10 md:hidden">
-            <Brand />
-          </div>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Sign in to QuizRank
+          </h2>
 
-          {/* QuizRank Logo */}
-          <div className="mb-6 flex justify-center">
-            <img
-              src={quizRankLogo}
-              alt="QuizRank Logo"
-              className="h-20 w-20 object-contain"
-            />
-          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+            Enter your student or teacher credentials.
+          </p>
+        </div>
 
-          <div className="mb-8">
-            <p className="text-sm font-semibold text-[##10b981]">
-              WELCOME BACK
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-              Sign in to QuizRank
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Enter your student or teacher credentials.
-            </p>
-          </div>
+        {/* Error Message */}
+        <ErrorBox>{error}</ErrorBox>
 
-          <ErrorBox>{error}</ErrorBox>
+        {/* Login Form */}
+        <form onSubmit={submit} className="space-y-5">
 
-          <form onSubmit={submit} className="space-y-5">
-            <div>
-              <label className="field-label" htmlFor="userId">
-                Student / Teacher ID
-              </label>
-              <div className="input-icon-wrap">
-                <UserRound size={19} />
-                <input
-                  id="userId"
-                  className="field-input"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="Enter your ID"
-                  autoComplete="username"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="field-label" htmlFor="password">
-                Password
-              </label>
-              <div className="input-icon-wrap">
-                <LockKeyhole size={19} />
-                <input
-                  id="password"
-                  className="field-input pr-12"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-4 text-slate-400 hover:text-slate-700"
-                  aria-label="Toggle password"
-                >
-                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-                </button>
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm text-slate-600">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              Remember me
+          {/* User ID */}
+          <div>
+            <label
+              className="field-label"
+              htmlFor="userId"
+            >
+              Student / Teacher ID
             </label>
 
-            <button disabled={loading} className="btn-primary w-full py-3.5">
-              {loading ? (
-                <LoaderCircle className="animate-spin" size={19} />
-              ) : (
-                <LogIn size={19} />
-              )}{" "}
-              {loading ? "Signing in..." : "Login"}
-            </button>
-          </form>
+            <div className="input-icon-wrap">
+              <UserRound size={19} />
 
-          <div className="my-7 flex items-center gap-4">
-            <span className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">NEW TO QUIZRANK?</span>
-            <span className="h-px flex-1 bg-slate-200" />
+              <input
+                id="userId"
+                className="field-input"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                placeholder="Enter your ID"
+                autoComplete="username"
+                required
+              />
+            </div>
           </div>
 
-          <Link to="/register" className="btn-secondary w-full py-3">
-            Create an account
-          </Link>
+          {/* Password */}
+          <div>
+            <label
+              className="field-label"
+              htmlFor="password"
+            >
+              Password
+            </label>
 
-          <p className="mt-8 text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} QuizRank · Department Quiz Platform
-          </p>
-        </section>
+            <div className="input-icon-wrap">
+              <LockKeyhole size={19} />
+
+              <input
+                id="password"
+                className="field-input pr-12"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-4 text-slate-400 transition hover:text-slate-700"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? (
+                  <EyeOff size={19} />
+                ) : (
+                  <Eye size={19} />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember Me */}
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 accent-emerald-600 focus:ring-emerald-500"
+            />
+
+            Remember me
+          </label>
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary flex w-full items-center justify-center gap-2 py-3.5 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {loading ? (
+              <LoaderCircle
+                className="animate-spin"
+                size={19}
+              />
+            ) : (
+              <LogIn size={19} />
+            )}
+
+            {loading ? "Signing in..." : "Login"}
+          </button>
+
+        </form>
+
+        {/* Footer */}
+        <p className="mt-10 text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} QuizRank ·Developed by 3DEV. All rights reserved.
+        </p>
+
       </div>
     </main>
   );
