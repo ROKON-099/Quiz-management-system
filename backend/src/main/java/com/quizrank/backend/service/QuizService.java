@@ -1,11 +1,179 @@
 package com.quizrank.backend.service;
-import com.quizrank.backend.entity.*; import com.quizrank.backend.repository.*; import com.quizrank.backend.dto.*; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import java.time.*; import java.util.*;
-@Service public class QuizService {
-private final QuizRepository quizzes; private final QuestionRepository questions; private final UserRepository users; private final SubjectRepository subjects; private final QuizAttemptRepository attempts; private final QuizAttemptAnswerRepository answers; private final QuizResultRepository results;
-public QuizService(QuizRepository q,QuestionRepository qu,UserRepository u,SubjectRepository s,QuizAttemptRepository a,QuizAttemptAnswerRepository aa,QuizResultRepository r){quizzes=q;questions=qu;users=u;subjects=s;attempts=a;answers=aa;results=r;}
-@Transactional public Quiz create(CreateQuizRequest req){User teacher=users.findById(req.createdBy()).orElseThrow(()->new NoSuchElementException("Teacher not found")); if(teacher.getRole()!=User.Role.TEACHER) throw new IllegalArgumentException("Only teachers can create quizzes"); if(!subjects.existsById(req.subjectId())) throw new NoSuchElementException("Subject not found"); Quiz q=new Quiz(); q.setSubjectId(req.subjectId());q.setTopic(req.topic());q.setQuizDate(req.quizDate());q.setQuizTime(req.quizTime());q.setCreatedBy(req.createdBy());q.setTotalQuestions(req.questions().size()); q=quizzes.save(q); for(QuestionRequest x:req.questions()){Question z=new Question();z.setQuizId(q.getId());z.setQuestion(x.question());z.setOptionA(x.optionA());z.setOptionB(x.optionB());z.setOptionC(x.optionC());z.setOptionD(x.optionD());z.setCorrectAnswer(x.correctAnswer().toUpperCase());questions.save(z);} return q;}
-public List<StudentQuestionResponse> studentQuestions(Integer quizId){if(!quizzes.existsById(quizId))throw new NoSuchElementException("Quiz not found");return questions.findByQuizIdOrderById(quizId).stream().map(StudentQuestionResponse::from).toList();}
-@Transactional public QuizAttempt start(Integer studentId,Integer quizId){User student=users.findById(studentId).orElseThrow(()->new NoSuchElementException("Student not found"));if(student.getRole()!=User.Role.STUDENT)throw new IllegalArgumentException("Only students can attempt quizzes");Quiz quiz=quizzes.findById(quizId).orElseThrow(()->new NoSuchElementException("Quiz not found")); if(LocalDateTime.now().isBefore(LocalDateTime.of(quiz.getQuizDate(),quiz.getQuizTime())))throw new IllegalArgumentException("Quiz has not started yet"); if(attempts.findFirstByStudentIdAndQuizIdAndStatus(studentId,quizId,QuizAttempt.Status.IN_PROGRESS).isPresent())throw new IllegalArgumentException("An attempt is already in progress"); QuizAttempt a=new QuizAttempt();a.setStudentId(studentId);a.setQuizId(quizId);a.setCurrentQuestion(0);a.setScore(0);a.setQuestionStartedAt(LocalDateTime.now());a.setStatus(QuizAttempt.Status.IN_PROGRESS);return attempts.save(a);}
-@Transactional public QuizAttemptAnswer answer(Integer attemptId,AnswerRequest req){QuizAttempt a=attempts.findById(attemptId).orElseThrow(()->new NoSuchElementException("Attempt not found"));if(a.getStatus()!=QuizAttempt.Status.IN_PROGRESS)throw new IllegalArgumentException("Attempt already completed");Question q=questions.findById(req.questionId()).orElseThrow(()->new NoSuchElementException("Question not found"));if(!q.getQuizId().equals(a.getQuizId()))throw new IllegalArgumentException("Question does not belong to this quiz");if(answers.findByAttemptIdAndQuestionId(attemptId,q.getId()).isPresent())throw new IllegalArgumentException("Question already answered");boolean correct=q.getCorrectAnswer().equalsIgnoreCase(req.selectedAnswer());QuizAttemptAnswer aa=new QuizAttemptAnswer();aa.setAttemptId(attemptId);aa.setQuestionId(q.getId());aa.setSelectedAnswer(req.selectedAnswer().toUpperCase());aa.setIsCorrect(correct);answers.save(aa);if(correct)a.setScore(a.getScore()+1);a.setCurrentQuestion(a.getCurrentQuestion()+1);a.setQuestionStartedAt(LocalDateTime.now());attempts.save(a);return aa;}
-@Transactional public QuizResult finish(Integer attemptId){QuizAttempt a=attempts.findById(attemptId).orElseThrow(()->new NoSuchElementException("Attempt not found"));if(a.getStatus()==QuizAttempt.Status.COMPLETED)throw new IllegalArgumentException("Attempt already completed");int total=(int)questions.countByQuizId(a.getQuizId());a.setStatus(QuizAttempt.Status.COMPLETED);a.setCompletedAt(LocalDateTime.now());attempts.save(a);QuizResult r=new QuizResult();r.setStudentId(a.getStudentId());r.setQuizId(a.getQuizId());r.setScore(a.getScore());r.setTotal(total);return results.save(r);}
+
+import com.quizrank.backend.dto.*;
+import com.quizrank.backend.entity.*;
+import com.quizrank.backend.repository.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+
+@Service
+public class QuizService {
+    private final QuizRepository quizzes;
+    private final QuestionRepository questions;
+    private final UserRepository users;
+    private final SubjectRepository subjects;
+    private final QuizAttemptRepository attempts;
+    private final QuizAttemptAnswerRepository answers;
+    private final QuizResultRepository results;
+
+    public QuizService(QuizRepository q, QuestionRepository qu, UserRepository u,
+                       SubjectRepository s, QuizAttemptRepository a,
+                       QuizAttemptAnswerRepository aa, QuizResultRepository r) {
+        quizzes = q;
+        questions = qu;
+        users = u;
+        subjects = s;
+        attempts = a;
+        answers = aa;
+        results = r;
+    }
+
+    @Transactional
+    public Quiz create(CreateQuizRequest req) {
+        User teacher = users.findById(req.createdBy())
+                .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
+        if (teacher.getRole() != User.Role.TEACHER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only teachers can create quizzes");
+        }
+        if (!subjects.existsById(req.subjectId())) {
+            throw new NoSuchElementException("Subject not found");
+        }
+        if (req.questions() == null || req.questions().isEmpty() || req.questions().size() > 10) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quiz must contain 1 to 10 questions");
+        }
+
+        Quiz quiz = new Quiz();
+        quiz.setSubjectId(req.subjectId());
+        quiz.setTopic(req.topic().trim());
+        quiz.setQuizDate(req.quizDate());
+        quiz.setQuizTime(req.quizTime());
+        quiz.setCreatedBy(req.createdBy());
+        quiz.setTotalQuestions(req.questions().size());
+        quiz = quizzes.saveAndFlush(quiz);
+
+        for (QuestionRequest item : req.questions()) {
+            if (item.correctAnswer() == null || !item.correctAnswer().matches("(?i)[ABCD]")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Correct answer must be A, B, C or D");
+            }
+            Question question = new Question();
+            question.setQuizId(quiz.getId());
+            question.setQuestion(item.question().trim());
+            question.setOptionA(item.optionA().trim());
+            question.setOptionB(item.optionB().trim());
+            question.setOptionC(item.optionC().trim());
+            question.setOptionD(item.optionD().trim());
+            question.setCorrectAnswer(item.correctAnswer().toUpperCase(Locale.ROOT));
+            questions.save(question);
+        }
+        return quiz;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentQuestionResponse> studentQuestions(Integer quizId) {
+        if (!quizzes.existsById(quizId)) throw new NoSuchElementException("Quiz not found");
+        return questions.findByQuizIdOrderById(quizId).stream()
+                .map(StudentQuestionResponse::from).toList();
+    }
+
+    @Transactional
+    public QuizAttempt start(Integer studentId, Integer quizId) {
+        User student = users.findById(studentId)
+                .orElseThrow(() -> new NoSuchElementException("Student not found"));
+        if (student.getRole() != User.Role.STUDENT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only students can attempt quizzes");
+        }
+        Quiz quiz = quizzes.findById(quizId)
+                .orElseThrow(() -> new NoSuchElementException("Quiz not found"));
+        if (quiz.getQuizDate() == null || quiz.getQuizTime() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz schedule is incomplete");
+        }
+        if (LocalDateTime.now().isBefore(LocalDateTime.of(quiz.getQuizDate(), quiz.getQuizTime()))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Quiz has not started yet");
+        }
+        if (questions.countByQuizId(quizId) == 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This quiz has no questions yet");
+        }
+
+        // The current database has UNIQUE(student_id, quiz_id). Check it before
+        // INSERT so a second attempt returns HTTP 409 instead of SQL/HTTP 500.
+        if (attempts.existsByStudentIdAndQuizId(studentId, quizId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "You have already started or completed this quiz. A second attempt is not allowed.");
+        }
+
+        QuizAttempt attempt = new QuizAttempt();
+        attempt.setStudentId(studentId);
+        attempt.setQuizId(quizId);
+        attempt.setCurrentQuestion(0);
+        attempt.setScore(0);
+        attempt.setQuestionStartedAt(LocalDateTime.now());
+        attempt.setStatus(QuizAttempt.Status.IN_PROGRESS);
+        return attempts.save(attempt);
+    }
+
+    @Transactional
+    public QuizAttemptAnswer answer(Integer attemptId, AnswerRequest req) {
+        QuizAttempt attempt = attempts.findById(attemptId)
+                .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+        if (attempt.getStatus() != QuizAttempt.Status.IN_PROGRESS) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt already completed");
+        }
+        Question question = questions.findById(req.questionId())
+                .orElseThrow(() -> new NoSuchElementException("Question not found"));
+        if (!question.getQuizId().equals(attempt.getQuizId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question does not belong to this quiz");
+        }
+        if (answers.findByAttemptIdAndQuestionId(attemptId, question.getId()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Question already answered");
+        }
+
+        String selected = req.selectedAnswer() == null || req.selectedAnswer().isBlank()
+                ? null : req.selectedAnswer().trim().toUpperCase(Locale.ROOT);
+        if (selected != null && !selected.matches("[ABCD]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected answer must be A, B, C or D");
+        }
+
+        boolean correct = selected != null && question.getCorrectAnswer().equalsIgnoreCase(selected);
+        QuizAttemptAnswer answer = new QuizAttemptAnswer();
+        answer.setAttemptId(attemptId);
+        answer.setQuestionId(question.getId());
+        answer.setSelectedAnswer(selected); // null means the timer expired without an answer
+        answer.setIsCorrect(correct);
+        answers.save(answer);
+
+        if (attempt.getScore() == null) attempt.setScore(0);
+        if (attempt.getCurrentQuestion() == null) attempt.setCurrentQuestion(0);
+        if (correct) attempt.setScore(attempt.getScore() + 1);
+        attempt.setCurrentQuestion(attempt.getCurrentQuestion() + 1);
+        attempt.setQuestionStartedAt(LocalDateTime.now());
+        attempts.save(attempt);
+        return answer;
+    }
+
+    @Transactional
+    public QuizResult finish(Integer attemptId) {
+        QuizAttempt attempt = attempts.findById(attemptId)
+                .orElseThrow(() -> new NoSuchElementException("Attempt not found"));
+        if (attempt.getStatus() == QuizAttempt.Status.COMPLETED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt already completed");
+        }
+        int total = (int) questions.countByQuizId(attempt.getQuizId());
+        attempt.setStatus(QuizAttempt.Status.COMPLETED);
+        attempt.setCompletedAt(LocalDateTime.now());
+        attempts.save(attempt);
+
+        QuizResult result = new QuizResult();
+        result.setStudentId(attempt.getStudentId());
+        result.setQuizId(attempt.getQuizId());
+        result.setScore(attempt.getScore() == null ? 0 : attempt.getScore());
+        result.setTotal(total);
+        return results.save(result);
+    }
 }
