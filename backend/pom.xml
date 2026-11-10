@@ -20,7 +20,7 @@
     <description>QuizRank Academic Quiz and Learning Management System</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>21</java.version>\n        <pdfbox.version>3.0.5</pdfbox.version>
     </properties>
 
     <dependencies>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>3.0.5</version>
+            <version>${pdfbox.version}</version>
         </dependency>
 
         <!-- Testing -->

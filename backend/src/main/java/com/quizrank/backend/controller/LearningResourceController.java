@@ -4,6 +4,7 @@ import com.quizrank.backend.dto.GradeAssignmentRequest;
 import com.quizrank.backend.entity.*;
 import com.quizrank.backend.repository.*;
 import com.quizrank.backend.service.UploadStorageService;
+import com.quizrank.backend.service.PlagiarismService;
 
 import jakarta.validation.Valid;
 
@@ -37,6 +38,7 @@ public class LearningResourceController {
     private final UserRepository users;
     private final StudentCourseRepository courses;
     private final UploadStorageService storage;
+    private final PlagiarismService plagiarismService;
 
     public LearningResourceController(
             AssignmentRepository a,
@@ -45,7 +47,8 @@ public class LearningResourceController {
             AssignmentResultRepository r,
             UserRepository u,
             StudentCourseRepository c,
-            UploadStorageService st) {
+            UploadStorageService st,
+            PlagiarismService ps) {
 
         assignments = a;
         materials = m;
@@ -54,6 +57,7 @@ public class LearningResourceController {
         users = u;
         courses = c;
         storage = st;
+        plagiarismService = ps;
     }
 
     // =====================================================
@@ -431,7 +435,11 @@ public class LearningResourceController {
 
         try {
 
-            return submissions.saveAndFlush(submission);
+            AssignmentSubmission saved = submissions.saveAndFlush(submission);
+            // Run similarity analysis asynchronously; submission success is not blocked by analysis.
+            try { plagiarismService.processSubmissionAsync(saved.getId()); }
+            catch (Exception ignored) { /* submission remains successful; teacher can recheck later */ }
+            return saved;
 
         } catch (DataIntegrityViolationException e) {
 
