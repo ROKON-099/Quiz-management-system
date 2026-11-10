@@ -1,3 +1,4 @@
+
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../components/common/ProtectedRoute";
@@ -19,6 +20,9 @@ import StudentNotice from "../pages/student/Notice";
 import StudentProfile from "../pages/student/Profile";
 import StudentQuiz from "../pages/student/Quiz";
 import StudentResult from "../pages/student/Result";
+import StudentAssignments from "../pages/student/Assignments";
+import StudentSimilarityReports from "../pages/student/SimilarityReports";
+import StudentClassNotes from "../pages/student/ClassNotes";
 
 // Teacher Pages
 import TeacherDashboard from "../pages/teacher/Dashboard";
@@ -27,40 +31,23 @@ import TeacherNotice from "../pages/teacher/Notice";
 import TeacherProfile from "../pages/teacher/Profile";
 import CreateQuiz from "../pages/teacher/CreateQuiz";
 import TeacherResults from "../pages/teacher/Results";
-
-// Assignment Pages
-import StudentAssignments from "../pages/student/Assignments";
-import StudentSimilarityReports from "../pages/student/SimilarityReports";
 import TeacherAssignments from "../pages/teacher/Assignments";
 import TeacherPlagiarism from "../pages/teacher/Plagiarism";
-
-// Class Notes Pages
-import StudentClassNotes from "../pages/student/ClassNotes";
 import TeacherClassNotes from "../pages/teacher/ClassMaterials";
 
 export default function AppRoutes() {
   return (
     <Routes>
 
-      {/* ================= AUTHENTICATION ================= */}
-
+      {/* AUTHENTICATION */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
 
 
-      {/* ================= COMMON ROUTES ================= */}
-
-      <Route element={<ProtectedRoute />}>
-        <Route path="/leaderboard" element={<Leaderboard />} />
-      </Route>
-
-
-      {/* ================= STUDENT ROUTES ================= */}
-
+      {/* STUDENT ROUTES */}
       <Route element={<ProtectedRoute role="STUDENT" />}>
-
         <Route path="/student" element={<StudentLayout />}>
 
           <Route
@@ -68,62 +55,63 @@ export default function AppRoutes() {
             element={<Navigate to="dashboard" replace />}
           />
 
-          {/* Dashboard */}
           <Route
             path="dashboard"
             element={<StudentDashboard />}
           />
 
-          {/* Courses */}
           <Route
             path="my-course"
             element={<StudentCourses />}
           />
 
-          {/* Course & Study Management / Notices */}
           <Route
             path="notice"
             element={<StudentNotice />}
           />
 
-          {/* Assignments */}
           <Route
             path="assignments"
             element={<StudentAssignments />}
           />
 
-          {/* Class Notes */}
+          <Route
+            path="similarity-reports"
+            element={<StudentSimilarityReports />}
+          />
+
           <Route
             path="class-notes"
             element={<StudentClassNotes />}
           />
 
-          {/* Profile */}
           <Route
             path="profile"
             element={<StudentProfile />}
           />
 
-          {/* Quiz */}
           <Route
             path="quiz/:id"
             element={<StudentQuiz />}
           />
 
-          {/* Quiz Result */}
           <Route
             path="result/:id"
             element={<StudentResult />}
+          />
+
+          {/* Student Leaderboard */}
+          <Route
+            path="/leaderboard"
+            element={<Leaderboard />}
           />
 
         </Route>
       </Route>
 
 
-      {/* ================= TEACHER ROUTES ================= */}
-
+      {/* TEACHER ROUTES */}
       <Route element={<ProtectedRoute role="TEACHER" />}>
-
         <Route path="/teacher" element={<TeacherLayout />}>
 
           <Route
@@ -131,67 +119,69 @@ export default function AppRoutes() {
             element={<Navigate to="dashboard" replace />}
           />
 
-          {/* Dashboard */}
           <Route
             path="dashboard"
             element={<TeacherDashboard />}
           />
 
-          {/* Courses */}
           <Route
             path="my-course"
             element={<TeacherCourses />}
           />
 
-          {/* Course & Study Management */}
           <Route
             path="notice"
             element={<TeacherNotice />}
           />
 
-          {/* Assignment Management */}
           <Route
             path="assignments"
             element={<TeacherAssignments />}
           />
 
-          {/* Class Notes Upload */}
+          {/* Teacher Plagiarism Check */}
+          <Route
+            path="plagiarism"
+            element={<TeacherPlagiarism />}
+          />
+
           <Route
             path="class-notes"
             element={<TeacherClassNotes />}
           />
 
-          {/* Create Quiz */}
           <Route
             path="create-quiz"
             element={<CreateQuiz />}
           />
 
-          {/* Student Results */}
           <Route
             path="results"
             element={<TeacherResults />}
           />
 
-          {/* Profile */}
           <Route
             path="profile"
             element={<TeacherProfile />}
+          />
+
+          {/* Teacher Leaderboard */}
+          <Route
+            path="/leaderboard"
+            element={<Leaderboard />}
           />
 
         </Route>
       </Route>
 
 
-      {/* ================= HOME REDIRECT ================= */}
-
+      {/* HOME REDIRECT */}
       <Route
         path="/"
         element={<HomeRedirect />}
       />
 
-      {/* ================= NOT FOUND ================= */}
-
+      {/* NOT FOUND */}
       <Route
         path="*"
         element={<Navigate to="/" replace />}

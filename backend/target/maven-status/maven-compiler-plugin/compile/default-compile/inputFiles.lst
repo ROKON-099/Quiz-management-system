@@ -5,6 +5,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\contr
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\LeaderboardController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\LearningResourceController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\NoticeController.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\PlagiarismController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\QuizAttemptController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\QuizController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\QuizResultController.java
@@ -16,6 +17,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\C
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\GradeAssignmentRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginResponse.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\ManualCompareRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\QuestionRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\StudentQuestionResponse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\UserResponse.java
@@ -30,6 +32,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entit
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\QuizAttempt.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\QuizAttemptAnswer.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\QuizResult.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\SimilarityReport.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\StudentCourse.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\Subject.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\entity\User.java
@@ -45,9 +48,13 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repos
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\QuizAttemptRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\QuizRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\QuizResultRepository.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\SimilarityReportRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\StudentCourseRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\SubjectRepository.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\repository\UserRepository.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\PdfTextExtractionService.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\PlagiarismService.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\QuizService.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\SimilarityService.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\UploadStorageService.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\service\UserService.java

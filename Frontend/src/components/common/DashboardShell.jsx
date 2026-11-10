@@ -31,7 +31,6 @@ const studentLinks = [
   ["Similarity Reports", "/student/similarity-reports", ScanSearch],
   ["Leaderboard", "/leaderboard", Trophy],
 ];
-
 const teacherLinks = [
   ["Overview", "/teacher/dashboard", LayoutDashboard],
   ["My Courses", "/teacher/my-course", BookOpen],

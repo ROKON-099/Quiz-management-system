@@ -1,6 +1,7 @@
 com\quizrank\backend\repository\SubjectRepository.class
 com\quizrank\backend\dto\StudentQuestionResponse.class
 com\quizrank\backend\entity\Quiz.class
+com\quizrank\backend\service\PlagiarismService.class
 com\quizrank\backend\service\QuizService.class
 com\quizrank\backend\repository\AcademicRecordRepository.class
 com\quizrank\backend\exception\GlobalExceptionHandler.class
@@ -8,6 +9,7 @@ com\quizrank\backend\entity\QuizResult.class
 com\quizrank\backend\repository\AssignmentRepository.class
 com\quizrank\backend\entity\LearningMaterial.class
 com\quizrank\backend\entity\AssignmentResult.class
+com\quizrank\backend\service\SimilarityService.class
 com\quizrank\backend\controller\LeaderboardController.class
 com\quizrank\backend\entity\Notice.class
 com\quizrank\backend\dto\CreateQuizRequest.class
@@ -22,6 +24,7 @@ com\quizrank\backend\repository\AssignmentSubmissionRepository.class
 com\quizrank\backend\dto\QuestionRequest.class
 com\quizrank\backend\repository\QuizAttemptRepository.class
 com\quizrank\backend\repository\AssignmentResultRepository.class
+com\quizrank\backend\dto\ManualCompareRequest.class
 com\quizrank\backend\repository\QuizAttemptAnswerRepository.class
 com\quizrank\backend\controller\QuizAttemptController.class
 com\quizrank\backend\dto\LoginResponse.class
@@ -29,10 +32,13 @@ com\quizrank\backend\entity\QuizAttempt$Status.class
 com\quizrank\backend\entity\StudentCourse.class
 com\quizrank\backend\entity\User.class
 com\quizrank\backend\repository\QuizResultRepository.class
+com\quizrank\backend\controller\PlagiarismController.class
 com\quizrank\backend\controller\QuizController.class
 com\quizrank\backend\entity\Assignment.class
+com\quizrank\backend\repository\SimilarityReportRepository.class
 com\quizrank\backend\service\UploadStorageService.class
 com\quizrank\backend\entity\Question.class
+com\quizrank\backend\service\PdfTextExtractionService.class
 com\quizrank\backend\controller\AcademicRecordController.class
 com\quizrank\backend\entity\AssignmentSubmission.class
 com\quizrank\backend\repository\QuizRepository.class
@@ -40,6 +46,7 @@ com\quizrank\backend\dto\UserResponse.class
 com\quizrank\backend\repository\UserRepository.class
 com\quizrank\backend\service\UserService.class
 com\quizrank\backend\entity\AssignmentResult$Grade.class
+com\quizrank\backend\service\SimilarityService$Score.class
 com\quizrank\backend\entity\QuizAttemptAnswer.class
 com\quizrank\backend\config\CorsConfig.class
 com\quizrank\backend\entity\AcademicRecord.class
@@ -54,4 +61,5 @@ com\quizrank\backend\BackendApplication.class
 com\quizrank\backend\controller\NoticeController$NoticeRequest.class
 com\quizrank\backend\controller\QuizResultController.class
 com\quizrank\backend\controller\UserController.class
+com\quizrank\backend\entity\SimilarityReport.class
 com\quizrank\backend\dto\AnswerRequest.class
