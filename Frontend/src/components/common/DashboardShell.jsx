@@ -40,6 +40,7 @@ const teacherLinks = [
   ["Plagiarism Check", "/teacher/plagiarism", ScanSearch],
   ["Class Notes", "/teacher/class-notes", NotebookPen],
   ["Student Results", "/teacher/results", ChartNoAxesCombined],
+  ["Leaderboard", "/leaderboard", Trophy],
 ];
 
 export default function DashboardShell({ role }) {
