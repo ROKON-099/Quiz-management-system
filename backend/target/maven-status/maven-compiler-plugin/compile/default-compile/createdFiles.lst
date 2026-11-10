@@ -1,3 +1,4 @@
+com\quizrank\backend\dto\AttemptStatusResponse.class
 com\quizrank\backend\repository\SubjectRepository.class
 com\quizrank\backend\dto\StudentQuestionResponse.class
 com\quizrank\backend\entity\Quiz.class
