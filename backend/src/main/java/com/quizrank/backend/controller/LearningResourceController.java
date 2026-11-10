@@ -17,6 +17,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 public class LearningResourceController {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(LearningResourceController.class);
 
     private final AssignmentRepository assignments;
     private final LearningMaterialRepository materials;
@@ -180,7 +185,12 @@ public class LearningResourceController {
     @GetMapping("/assignments")
     public List<Assignment> assignments() {
 
-        return assignments.findAllByOrderByCreatedAtDesc();
+        try {
+            return assignments.findAllByOrderByCreatedAtDesc();
+        } catch (RuntimeException e) {
+            log.error("Failed to load assignments from database", e);
+            throw e;
+        }
     }
 
     // Teacher assignments
@@ -372,10 +382,7 @@ public class LearningResourceController {
 
         Assignment assignment = getAssignment(id);
 
-        requireStudentEnrolled(
-                studentId,
-                assignment.getSubjectId()
-        );
+        requireStudentEnrolled(studentId, assignment.getSubjectId());
 
         // Deadline check
         if (assignment.getDueDate() != null &&
@@ -389,7 +396,6 @@ public class LearningResourceController {
 
         // File validation
         if (file == null || file.isEmpty()) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Please select a PDF file"
@@ -399,7 +405,7 @@ public class LearningResourceController {
         String originalName = file.getOriginalFilename();
 
         if (originalName == null ||
-                !originalName.toLowerCase().endsWith(".pdf")) {
+                !originalName.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -407,50 +413,74 @@ public class LearningResourceController {
             );
         }
 
-        // Check if already submitted
-        boolean alreadySubmitted =
-                submissions.findByAssignmentIdAndStudentId(
-                        id,
-                        studentId
-                ).isPresent();
-
-        if (alreadySubmitted) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "You have already submitted this assignment. Resubmission is not allowed."
-            );
-        }
-
-        // Save PDF
-        String storedName = storage.savePdf(file);
-
+        // Find an existing submission. If present, replace its PDF instead
+        // of inserting a second row (the database has a unique assignment/student key).
         AssignmentSubmission submission =
-                new AssignmentSubmission();
+                submissions.findByAssignmentIdAndStudentId(id, studentId)
+                        .orElseGet(AssignmentSubmission::new);
+
+        boolean isResubmission = submission.getId() != null;
+        String oldStoredName = isResubmission
+                ? submission.getStoredName()
+                : null;
+
+        // Store the new PDF first. Keep the old PDF until the DB update succeeds.
+        String newStoredName = storage.savePdf(file);
 
         submission.setAssignmentId(id);
         submission.setStudentId(studentId);
         submission.setFileName(originalName);
-        submission.setStoredName(storedName);
+        submission.setStoredName(newStoredName);
 
+        final AssignmentSubmission saved;
         try {
-
-            AssignmentSubmission saved = submissions.saveAndFlush(submission);
-            // Run similarity analysis asynchronously; submission success is not blocked by analysis.
-            try { plagiarismService.processSubmissionAsync(saved.getId()); }
-            catch (Exception ignored) { /* submission remains successful; teacher can recheck later */ }
-            return saved;
-
+            saved = submissions.saveAndFlush(submission);
         } catch (DataIntegrityViolationException e) {
-
-            // Database unique key also prevents duplicate submissions
-            storage.delete(storedName);
-
+            log.error(
+                    "Database constraint violation for assignment {} and student {}",
+                    id,
+                    studentId,
+                    e
+            );
+            storage.delete(newStoredName);
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "You have already submitted this assignment."
+                    "Submission could not be saved because of a database constraint."
+            );
+        } catch (RuntimeException e) {
+            log.error(
+                    "Failed to save submission for assignment {} and student {}",
+                    id,
+                    studentId,
+                    e
+            );
+            storage.delete(newStoredName);
+            throw e;
+        }
+
+        // The database update succeeded; now the previous PDF can be removed.
+        if (isResubmission && oldStoredName != null &&
+                !oldStoredName.equals(newStoredName)) {
+            try {
+                storage.delete(oldStoredName);
+            } catch (Exception e) {
+                // Do not fail the successful submission if old-file cleanup fails.
+                log.warn("Could not delete previous submission file {}", oldStoredName, e);
+            }
+        }
+
+        // Plagiarism analysis must not undo or fail a successful submission.
+        try {
+            plagiarismService.processSubmissionAsync(saved.getId());
+        } catch (Exception e) {
+            log.error(
+                    "Could not start plagiarism analysis for submission {}",
+                    saved.getId(),
+                    e
             );
         }
+
+        return saved;
     }
 
     // =====================================================
