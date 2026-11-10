@@ -30,7 +30,9 @@ import TeacherResults from "../pages/teacher/Results";
 
 // Assignment Pages
 import StudentAssignments from "../pages/student/Assignments";
+import StudentSimilarityReports from "../pages/student/SimilarityReports";
 import TeacherAssignments from "../pages/teacher/Assignments";
+import TeacherPlagiarism from "../pages/teacher/Plagiarism";
 
 // Class Notes Pages
 import StudentClassNotes from "../pages/student/ClassNotes";
