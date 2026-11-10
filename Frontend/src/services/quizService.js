@@ -9,3 +9,18 @@ export const submitAnswer = async (attemptId, payload) =>
   (await api.post(`/attempts/${attemptId}/answer`, payload)).data;
 export const finishAttempt = async (attemptId) =>
   (await api.post(`/attempts/${attemptId}/finish`)).data;
+// Check whether student already attempted this quiz
+export const checkAttempt = async (studentId, quizId) =>
+  (
+    await api.get("/attempts/check", {
+      params: { studentId, quizId },
+    })
+  ).data;
+
+// Get previous attempt result
+export const getPreviousAttempt = async (studentId, quizId) =>
+  (
+    await api.get("/attempts/result", {
+      params: { studentId, quizId },
+    })
+  ).data;

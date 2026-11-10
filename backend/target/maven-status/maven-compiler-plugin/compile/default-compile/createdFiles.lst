@@ -33,6 +33,7 @@ com\quizrank\backend\entity\StudentCourse.class
 com\quizrank\backend\entity\User.class
 com\quizrank\backend\repository\QuizResultRepository.class
 com\quizrank\backend\controller\PlagiarismController.class
+com\quizrank\backend\dto\CourseResultDTO.class
 com\quizrank\backend\controller\QuizController.class
 com\quizrank\backend\entity\Assignment.class
 com\quizrank\backend\repository\SimilarityReportRepository.class

@@ -1,27 +1,16 @@
-
-import { Fragment, useEffect, useState } from "react";
-import {
-  RefreshCw,
-  FileDown,
-  ScanSearch,
-} from "lucide-react";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
 
 import PageTitle from "../../components/common/PageTitle";
 import Loading from "../../components/common/Loading";
 import { ErrorBox, EmptyState } from "../../components/common/Feedback";
 import { useAuth } from "../../context/AuthContext";
 
-import {
-  getAssignments,
-  getAssignmentSubmissions,
-} from "../../services/learningService";
+import { getAssignments } from "../../services/learningService";
 
 import {
   getSimilarityReports,
   getPlagiarismStats,
-  compareSubmissions,
-  recheckSubmission,
-  downloadSimilarityPdf,
 } from "../../services/plagiarismService";
 
 // Status badge colors
@@ -34,7 +23,109 @@ const badge = (status) => {
     return "bg-amber-100 text-amber-700";
   }
 
-  return "bg-emerald-100 text-emerald-700";
+  if (status === "LOW_SIMILARITY") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
+};
+
+const getStatus = (similarity) => {
+  if (similarity >= 70) return "HIGH_SIMILARITY";
+  if (similarity >= 30) return "NEEDS_REVIEW";
+  return "LOW_SIMILARITY";
+};
+
+// Normalize report values
+const getSubmissionInfo = (report) => {
+  const submissionAId = Number(
+    report.submissionAId ?? report.submissionA?.id ?? 0
+  );
+
+  const submissionBId = Number(
+    report.submissionBId ?? report.submissionB?.id ?? 0
+  );
+
+  /*
+   * Assumption:
+   * The larger submission ID belongs to the newer submission.
+   * Backend should ideally provide newSubmissionId explicitly.
+   */
+
+  if (submissionAId > submissionBId) {
+    return {
+      studentId: report.studentAId,
+      studentName: report.studentAName,
+      userId: report.studentAUserId,
+      submissionId: submissionAId,
+    };
+  }
+
+  return {
+    studentId: report.studentBId,
+    studentName: report.studentBName,
+    userId: report.studentBUserId,
+    submissionId: submissionBId,
+  };
+};
+
+// Group all comparison reports by submitting student
+const groupReportsByStudent = (reports) => {
+  const groups = new Map();
+
+  reports.forEach((report) => {
+    const student = getSubmissionInfo(report);
+
+    if (!student.studentId) return;
+
+    const key = String(student.studentId);
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        studentId: student.studentId,
+        studentName: student.studentName,
+        userId: student.userId,
+        reports: [],
+        highestReport: null,
+      });
+    }
+
+    const group = groups.get(key);
+
+    group.reports.push(report);
+
+    const currentScore = Number(
+      report.similarityPercent ?? 0
+    );
+
+    const highestScore = Number(
+      group.highestReport?.similarityPercent ?? -1
+    );
+
+    if (currentScore > highestScore) {
+      group.highestReport = report;
+    }
+  });
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const highest = group.highestReport;
+
+      return {
+        ...group,
+        similarityPercent: Number(
+          highest?.similarityPercent ?? 0
+        ),
+        status: getStatus(
+          Number(highest?.similarityPercent ?? 0)
+        ),
+        matchedCount: highest?.matchedCount ?? 0,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.similarityPercent - a.similarityPercent
+    );
 };
 
 export default function Plagiarism() {
@@ -45,7 +136,6 @@ export default function Plagiarism() {
   const [assignmentId, setAssignmentId] = useState("");
 
   const [reports, setReports] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
 
   const [stats, setStats] = useState({
     total: 0,
@@ -53,9 +143,6 @@ export default function Plagiarism() {
     needsReview: 0,
     lowSimilarity: 0,
   });
-
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
@@ -77,11 +164,13 @@ export default function Plagiarism() {
         }
       })
       .catch((e) => {
-        setError(e.message);
+        setError(
+          e.message || "Failed to load assignments."
+        );
       });
   }, [teacherId]);
 
-  // Load plagiarism reports, statistics and submissions
+  // Load all automatic comparison reports
   async function load(id = assignmentId) {
     if (!id) return;
 
@@ -89,18 +178,27 @@ export default function Plagiarism() {
     setError("");
 
     try {
-      const [reportData, statsData, submissionData] =
-        await Promise.all([
-          getSimilarityReports(id, teacherId),
-          getPlagiarismStats(id, teacherId),
-          getAssignmentSubmissions(id, teacherId),
-        ]);
+      const [reportData, statsData] = await Promise.all([
+        getSimilarityReports(id, teacherId),
+        getPlagiarismStats(id, teacherId),
+      ]);
 
-      setReports(reportData);
-      setStats(statsData);
-      setSubmissions(submissionData);
+      setReports(
+        Array.isArray(reportData) ? reportData : []
+      );
+
+      setStats(
+        statsData || {
+          total: 0,
+          highSimilarity: 0,
+          needsReview: 0,
+          lowSimilarity: 0,
+        }
+      );
     } catch (e) {
-      setError(e.message);
+      setError(
+        e.message || "Failed to load similarity reports."
+      );
     } finally {
       setBusy(false);
     }
@@ -110,65 +208,30 @@ export default function Plagiarism() {
   useEffect(() => {
     if (assignmentId) {
       load(assignmentId);
+    } else {
+      setReports([]);
     }
   }, [assignmentId]);
 
-  // Manual PDF comparison
-  async function manualCompare() {
-    if (!a || !b || a === b) {
-      setError("Select two different submissions.");
-      return;
-    }
+  // Group comparison reports by student
+  const groupedReports = useMemo(
+    () => groupReportsByStudent(reports),
+    [reports]
+  );
 
-    setBusy(true);
-    setError("");
-
-    try {
-      await compareSubmissions({
-        submissionAId: Number(a),
-        submissionBId: Number(b),
-        teacherId,
-      });
-
-      await load();
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // Recheck submission
-  async function recheck(id) {
-    setBusy(true);
-    setError("");
-
-    try {
-      await recheckSubmission(id, teacherId);
-
-      setError(
-        "Recheck queued. Refresh in a moment to view the result."
-      );
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // Search and filter reports
-  const filtered = reports.filter((r) => {
-    const matchesStatus = !status || r.status === status;
+  // Search and filter grouped students
+  const filtered = groupedReports.filter((student) => {
+    const matchesStatus =
+      !status || student.status === status;
 
     const searchText = `
-      ${r.studentAName || ""}
-      ${r.studentBName || ""}
-      ${r.studentAUserId || ""}
-      ${r.studentBUserId || ""}
+      ${student.studentName || ""}
+      ${student.userId || ""}
     `.toLowerCase();
 
     const matchesQuery =
-      !query || searchText.includes(query.toLowerCase());
+      !query ||
+      searchText.includes(query.toLowerCase());
 
     return matchesStatus && matchesQuery;
   });
@@ -176,45 +239,61 @@ export default function Plagiarism() {
   return (
     <div className="space-y-6">
 
-      {/* Page heading */}
+      {/* Page Heading */}
       <PageTitle
         title="Plagiarism & Similarity"
-        subtitle="Compare submitted PDFs within each assignment. Similarity is an indicator for teacher review, not proof of misconduct."
+        subtitle="Automatic similarity analysis of student assignment submissions."
       />
 
       <ErrorBox>{error}</ErrorBox>
 
-      {/* Assignment selection and statistics */}
+      {/* Assignment Selection and Statistics */}
       <section className="panel-card p-5">
 
         <label className="field-label">
-          Select assignment
+          Select Assignment
         </label>
 
-        <select
-          className="field-input standalone max-w-xl"
-          value={assignmentId}
-          onChange={(e) => setAssignmentId(e.target.value)}
-        >
-          <option value="">Select assignment</option>
+        <div className="flex flex-wrap items-center gap-3">
 
-          {assignments.map((assignment) => (
-            <option
-              key={assignment.id}
-              value={assignment.id}
-            >
-              {assignment.title}
+          <select
+            className="field-input standalone max-w-xl"
+            value={assignmentId}
+            onChange={(e) => setAssignmentId(e.target.value)}
+          >
+            <option value="">
+              Select assignment
             </option>
-          ))}
-        </select>
 
+            {assignments.map((assignment) => (
+              <option
+                key={assignment.id}
+                value={assignment.id}
+              >
+                {assignment.title}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="btn-secondary"
+            disabled={busy || !assignmentId}
+            onClick={() => load()}
+          >
+            <RefreshCw size={15} />
+            Refresh
+          </button>
+
+        </div>
+
+        {/* Statistics */}
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
           {[
-            ["Total comparisons", stats.total],
-            ["High similarity", stats.highSimilarity],
-            ["Needs review", stats.needsReview],
-            ["Low similarity", stats.lowSimilarity],
+            ["Total Comparisons", stats.total],
+            ["High Similarity", stats.highSimilarity],
+            ["Needs Review", stats.needsReview],
+            ["Low Similarity", stats.lowSimilarity],
           ].map(([label, value]) => (
             <div
               className="rounded-xl bg-slate-50 p-4"
@@ -233,76 +312,27 @@ export default function Plagiarism() {
         </div>
       </section>
 
-      {/* Manual comparison */}
-      <section className="panel-card p-5">
-
-        <h2 className="mb-3 font-bold">
-          Manual comparison
-        </h2>
-
-        <div className="grid gap-3 md:grid-cols-3">
-
-          {/* Submission selectors */}
-          {[
-            ["Submission A", a, setA],
-            ["Submission B", b, setB],
-          ].map(([label, value, setter]) => (
-            <label
-              className="text-sm font-medium text-slate-600"
-              key={label}
-            >
-              {label}
-
-              <select
-                className="field-input standalone mt-1"
-                value={value}
-                onChange={(e) => setter(e.target.value)}
-              >
-                <option value="">
-                  Select submission
-                </option>
-
-                {submissions.map((submission) => (
-                  <option
-                    key={submission.submissionId}
-                    value={submission.submissionId}
-                  >
-                    {submission.studentName} ·{" "}
-                    {submission.userId} · #
-                    {submission.submissionId}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ))}
-
-          <button
-            className="btn-primary self-end"
-            disabled={busy || !assignmentId}
-            onClick={manualCompare}
-          >
-            <ScanSearch size={16} />
-            Compare PDFs
-          </button>
-
-        </div>
-      </section>
-
-      {/* Similarity reports */}
+      {/* Grouped Similarity Reports */}
       <section className="panel-card overflow-hidden">
 
-        {/* Report header and filters */}
+        {/* Header and Filters */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">
 
-          <h2 className="font-bold">
-            Similarity reports
-          </h2>
+          <div>
+            <h2 className="font-bold text-slate-900">
+              Student Similarity Reports
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              One row per student. Showing the highest similarity score.
+            </p>
+          </div>
 
           <div className="flex flex-wrap gap-2">
 
             <input
               className="field-input standalone"
-              placeholder="Search student..."
+              placeholder="Search student name or ID..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -313,30 +343,24 @@ export default function Plagiarism() {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="">All statuses</option>
+
               <option value="HIGH_SIMILARITY">
-                High similarity
+                High Similarity
               </option>
+
               <option value="NEEDS_REVIEW">
-                Needs review
+                Needs Review
               </option>
+
               <option value="LOW_SIMILARITY">
-                Low similarity
+                Low Similarity
               </option>
             </select>
-
-            <button
-              className="btn-secondary"
-              disabled={busy || !assignmentId}
-              onClick={() => load()}
-            >
-              <RefreshCw size={15} />
-              Refresh
-            </button>
 
           </div>
         </div>
 
-        {/* Report content */}
+        {/* Table Content */}
         {busy ? (
           <div className="p-5">
             <Loading />
@@ -345,143 +369,173 @@ export default function Plagiarism() {
           <div className="p-5">
             <EmptyState
               title="No similarity reports yet"
-              message="Reports are generated automatically after students submit PDFs, or use manual comparison above."
+              message="Student similarity reports will appear automatically after PDF submissions are compared."
             />
           </div>
         ) : (
 
           <div className="overflow-x-auto">
 
-            <table className="w-full min-w-[850px] text-left text-sm">
+            <table className="w-full min-w-[750px] text-left text-sm">
 
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+              {/* Table Header */}
+              <thead className="bg-[#d0fae5] text-xs uppercase text-slate-700">
+
                 <tr>
-                  <th className="px-4 py-3">
-                    Students
+                  <th className="px-5 py-4">
+                    Student Name
                   </th>
 
-                  <th className="px-4 py-3">
+                  <th className="px-5 py-4">
                     Similarity
                   </th>
 
-                  <th className="px-4 py-3">
-                    Cosine / Jaccard / N-gram
-                  </th>
-
-                  <th className="px-4 py-3">
+                  <th className="px-5 py-4">
                     Status
                   </th>
 
-                  <th className="px-4 py-3">
-                    Matched phrases
+                  <th className="px-5 py-4">
+                    Matched Phrases
                   </th>
 
-                  <th className="px-4 py-3">
+                  <th className="px-5 py-4 text-center">
                     Details
                   </th>
                 </tr>
+
               </thead>
 
-              <tbody className="divide-y">
+              {/* Table Body */}
+              <tbody className="divide-y divide-slate-200">
 
-                {filtered.map((report) => (
-                  <Fragment key={report.id}>
+                {filtered.map((student) => (
+                  <Fragment key={student.studentId}>
 
-                    {/* Main report row */}
-                    <tr>
+                    {/* One row per student */}
+                    <tr className="transition hover:bg-slate-50">
 
-                      <td className="px-4 py-3">
-                        <b>{report.studentAName}</b>
-                        {" vs "}
-                        <b>{report.studentBName}</b>
+                      {/* Student Name and ID */}
+                      <td className="px-5 py-4">
 
-                        <p className="text-xs text-slate-400">
-                          {report.studentAUserId}
-                          {" / "}
-                          {report.studentBUserId}
+                        <p className="font-semibold text-slate-900">
+                          {student.studentName || "Unknown Student"}
                         </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          {student.userId || "N/A"}
+                        </p>
+
                       </td>
 
-                      <td className="px-4 py-3 font-bold">
-                        {report.similarityPercent}%
+                      {/* Highest Similarity */}
+                      <td className="px-5 py-4">
+
+                        <span className="text-lg font-bold text-slate-900">
+                          {student.similarityPercent}%
+                        </span>
+
                       </td>
 
-                      <td className="px-4 py-3">
-                        {report.cosinePercent}% /{" "}
-                        {report.jaccardPercent}% /{" "}
-                        {report.ngramPercent}%
-                      </td>
+                      {/* Status */}
+                      <td className="px-5 py-4">
 
-                      <td className="px-4 py-3">
                         <span
-                          className={`rounded-full px-2 py-1 text-xs font-semibold ${badge(
-                            report.status
+                          className={`inline-flex rounded-full px-4 py-2 text-xs font-semibold ${badge(
+                            student.status
                           )}`}
                         >
-                          {(report.status || "UNKNOWN").replaceAll(
+                          {student.status.replaceAll(
                             "_",
                             " "
                           )}
                         </span>
+
                       </td>
 
-                      <td className="px-4 py-3">
-                        {report.matchedCount ?? 0}
+                      {/* Matched Phrases */}
+                      <td className="px-5 py-4">
+
+                        <span className="font-semibold text-slate-700">
+                          {student.matchedCount}
+                        </span>
+
                       </td>
 
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                      {/* Details */}
+                      <td className="px-5 py-4 text-center">
 
-                          <button
-                            className="btn-secondary"
-                            onClick={() =>
-                              setExpanded(
-                                expanded === report.id
-                                  ? null
-                                  : report.id
-                              )
-                            }
-                          >
-                            View
-                          </button>
+                        <button
+                          className="btn-secondary"
+                          onClick={() =>
+                            setExpanded(
+                              expanded === student.studentId
+                                ? null
+                                : student.studentId
+                            )
+                          }
+                        >
+                          {expanded === student.studentId
+                            ? "Hide"
+                            : "View"}
+                        </button>
 
-                          <button
-                            className="btn-secondary"
-                            onClick={() =>
-                              downloadSimilarityPdf(
-                                report.id,
-                                teacherId
-                              )
-                            }
-                          >
-                            <FileDown size={14} />
-                            PDF
-                          </button>
-
-                        </div>
                       </td>
 
                     </tr>
 
-                    {/* Expanded matching text */}
-                    {expanded === report.id && (
+                    {/* Expanded Matching Text */}
+                    {expanded === student.studentId && (
                       <tr>
+
                         <td
-                          colSpan="6"
+                          colSpan={5}
                           className="bg-slate-50 px-5 py-4"
                         >
 
-                          <p className="mb-2 font-semibold">
-                            Exact matching sentences (
-                            {report.matchedCount ?? 0})
-                          </p>
+                          <div className="space-y-4">
 
-                          <pre className="whitespace-pre-wrap text-sm text-slate-700">
-                            {report.matchedText ||
-                              "No exact matching sentences were found. Similarity can still be based on token and phrase overlap."}
-                          </pre>
+                            <p className="font-semibold text-slate-800">
+                              Similarity Details (
+                              {student.reports.length} comparisons)
+                            </p>
+
+                            {student.reports.map((report, index) => (
+
+                              <div
+                                key={report.id}
+                                className="border-b border-slate-200 pb-4 last:border-0"
+                              >
+
+                                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+
+                                  <p className="text-sm font-semibold text-slate-700">
+                                    Matching Result {index + 1}
+                                  </p>
+
+                                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                    {report.similarityPercent ?? 0}% Similarity
+                                  </span>
+
+                                </div>
+
+                                <p className="mb-2 text-sm text-slate-600">
+                                  Matched phrases:{" "}
+                                  {report.matchedCount ?? 0}
+                                </p>
+
+                                <pre className="whitespace-pre-wrap break-words rounded-lg border bg-white p-4 text-sm leading-7 text-slate-700">
+                                  {report.matchedText ||
+                                    "No matching text details available."}
+                                </pre>
+
+                              </div>
+
+                            ))}
+
+                          </div>
 
                         </td>
+
                       </tr>
                     )}
 
@@ -491,6 +545,7 @@ export default function Plagiarism() {
               </tbody>
 
             </table>
+
           </div>
         )}
 
@@ -499,4 +554,3 @@ export default function Plagiarism() {
     </div>
   );
 }
-

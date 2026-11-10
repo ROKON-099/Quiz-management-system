@@ -13,6 +13,7 @@ C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\contr
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\SubjectController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\controller\UserController.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\AnswerRequest.java
+C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\CourseResultDTO.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\CreateQuizRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\GradeAssignmentRequest.java
 C:\Users\mroko\Desktop\QuizRank\backend\src\main\java\com\quizrank\backend\dto\LoginRequest.java

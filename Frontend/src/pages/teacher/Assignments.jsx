@@ -10,16 +10,20 @@ import {
   Save,
   X,
 } from "lucide-react";
+
 import PageTitle from "../../components/common/PageTitle";
 import { useAuth } from "../../context/AuthContext";
 import useAsync from "../../hooks/useAsync";
 import Loading from "../../components/common/Loading";
+
 import {
   EmptyState,
   ErrorBox,
   SuccessBox,
 } from "../../components/common/Feedback";
+
 import { getTeacherCourses } from "../../services/courseService";
+
 import {
   getAssignments,
   publishAssignment,
@@ -27,57 +31,85 @@ import {
   gradeAssignment,
   downloadLearningFile,
 } from "../../services/learningService";
+
+import { getSimilarityReports } from "../../services/plagiarismService";
 import { displayDate } from "../../utils/format";
 
 export default function Assignments() {
   const { user } = useAuth();
   const teacherId = user?.id ?? user?.userId;
+
   const {
     data: assignments,
     loading,
     error,
     refetch,
   } = useAsync(() => getAssignments("TEACHER", teacherId), [teacherId]);
+
   const { data: courses } = useAsync(
     () => getTeacherCourses(teacherId),
-    [teacherId],
+    [teacherId]
   );
+
   const [form, setForm] = useState({
     title: "",
     description: "",
     dueDate: "",
     subjectId: "",
   });
+
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState("");
   const [success, setSuccess] = useState("");
   const [selected, setSelected] = useState(null);
+
   const [rows, setRows] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [gradeDraft, setGradeDraft] = useState({});
   const [saving, setSaving] = useState(null);
+
+  // Similarity percentage mapped by submission ID
+  const [similarityMap, setSimilarityMap] = useState({});
+
+  // Publish assignment
   async function publish(e) {
     e.preventDefault();
+
     if (!file) {
       setFailure("Please choose an assignment PDF.");
       return;
     }
+
     const fd = new FormData();
+
     fd.append("teacherId", teacherId);
+
     Object.entries(form).forEach(([k, v]) => {
       if (v !== "") fd.append(k, v);
     });
+
     fd.append("file", file);
+
     setBusy(true);
     setFailure("");
     setSuccess("");
+
     try {
       await publishAssignment(fd);
+
       setSuccess("Assignment published successfully.");
-      setForm({ title: "", description: "", dueDate: "", subjectId: "" });
+
+      setForm({
+        title: "",
+        description: "",
+        dueDate: "",
+        subjectId: "",
+      });
+
       setFile(null);
       e.target.reset();
+
       refetch();
     } catch (x) {
       setFailure(x.message);
@@ -85,38 +117,116 @@ export default function Assignments() {
       setBusy(false);
     }
   }
+
+  // Open assignment submissions and load similarity reports
   async function openSubmissions(a) {
     setSelected(a);
     setTableLoading(true);
     setFailure("");
+
     try {
+      // Load existing assignment submissions
       const data = await getAssignmentSubmissions(a.id, teacherId);
+
       setRows(data);
+
       const drafts = {};
-      data.forEach(
-        (r) =>
-          (drafts[r.submissionId] = {
-            grade: r.grade || "AVG",
-            feedback: r.feedback || "",
-          }),
-      );
+
+      data.forEach((r) => {
+        drafts[r.submissionId] = {
+          grade: r.grade || "AVG",
+          feedback: r.feedback || "",
+        };
+      });
+
       setGradeDraft(drafts);
+
+      // Load similarity reports separately.
+      // Similarity failure must not break assignment review.
+      try {
+        const response = await getSimilarityReports(a.id, teacherId);
+
+        const reports = Array.isArray(response)
+          ? response
+          : response?.reports || response?.data || [];
+
+        const similarityData = {};
+
+        // Find the highest similarity for each submission.
+        data.forEach((submission) => {
+          const submissionId = Number(submission.submissionId);
+
+          const relatedReports = reports.filter((report) => {
+            const submissionAId = Number(
+              report.submissionAId ??
+              report.submissionA?.id ??
+              report.submission_a_id ??
+              0
+            );
+
+            const submissionBId = Number(
+              report.submissionBId ??
+              report.submissionB?.id ??
+              report.submission_b_id ??
+              0
+            );
+
+            return (
+              submissionAId === submissionId ||
+              submissionBId === submissionId
+            );
+          });
+
+          if (relatedReports.length === 0) {
+            similarityData[submissionId] = null;
+            return;
+          }
+
+          const highestSimilarity = Math.max(
+            ...relatedReports.map((report) =>
+              Number(report.similarityPercent ?? 0)
+            )
+          );
+
+          similarityData[submissionId] = highestSimilarity;
+        });
+
+        setSimilarityMap(similarityData);
+      } catch (similarityError) {
+        console.error(
+          "Failed to load similarity reports:",
+          similarityError
+        );
+
+        setSimilarityMap({});
+      }
     } catch (e) {
       setFailure(e.message);
     } finally {
       setTableLoading(false);
     }
   }
+
+  // Save assignment marking
   async function saveGrade(row) {
     const d = gradeDraft[row.submissionId] || {};
+
     setSaving(row.submissionId);
     setFailure("");
+
     try {
-      await gradeAssignment(selected.id, row.submissionId, teacherId, {
-        grade: d.grade,
-        feedback: d.feedback || "",
-      });
+      await gradeAssignment(
+        selected.id,
+        row.submissionId,
+        teacherId,
+        {
+          grade: d.grade,
+          feedback: d.feedback || "",
+        }
+      );
+
       setSuccess(`Saved marking for ${row.studentName}.`);
+
       await openSubmissions(selected);
     } catch (e) {
       setFailure(e.message);
@@ -124,55 +234,103 @@ export default function Assignments() {
       setSaving(null);
     }
   }
+
+  // Export result PDF
   async function exportPdf() {
     try {
       await downloadLearningFile(
         `/assignments/${selected.id}/results/teacher/${teacherId}/pdf`,
-        `${selected.title.replace(/[^a-z0-9-_]/gi, "_")}-results.pdf`,
+        `${selected.title.replace(/[^a-z0-9-_]/gi, "_")}-results.pdf`
       );
     } catch (e) {
       setFailure(e.message);
     }
   }
+
+  // Similarity badge
+  function renderSimilarity(submissionId) {
+    const similarity = similarityMap[submissionId];
+
+    if (similarity === null || similarity === undefined) {
+      return (
+        <span className="inline-flex whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+          Pending
+        </span>
+      );
+    }
+
+    let badgeClass = "bg-emerald-100 text-emerald-700";
+
+    if (similarity >= 70) {
+      badgeClass = "bg-rose-100 text-rose-700";
+    } else if (similarity >= 30) {
+      badgeClass = "bg-amber-100 text-amber-700";
+    }
+
+    return (
+      <span
+        className={`inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold ${badgeClass}`}
+      >
+        {similarity.toFixed(2)}%
+      </span>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageTitle
         title="Assignments"
         subtitle="Publish assignments, review student PDFs and record academic marking."
       />
+
       <ErrorBox>{error || failure}</ErrorBox>
       <SuccessBox>{success}</SuccessBox>
+
+      {/* Publish Assignment */}
       <section className="panel-card p-5 sm:p-6">
         <div className="mb-5 flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
             <FilePlus2 />
           </span>
+
           <div>
-            <h2 className="font-bold text-slate-900">Publish new assignment</h2>
+            <h2 className="font-bold text-slate-900">
+              Publish new assignment
+            </h2>
+
             <p className="text-sm text-slate-500">
               Upload the assignment brief as a PDF.
             </p>
           </div>
         </div>
+
         <form onSubmit={publish} className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="field-label">Assignment title</label>
+
             <input
               className="field-input standalone"
               maxLength="180"
               required
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, title: e.target.value })
+              }
             />
           </div>
+
           <div>
             <label className="field-label">Course / Subject</label>
+
             <select
               className="field-input standalone"
               value={form.subjectId}
-              onChange={(e) => setForm({ ...form, subjectId: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, subjectId: e.target.value })
+              }
             >
               <option value="">All students (general)</option>
+
               {(courses || []).map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name || c.subjectName}{" "}
@@ -181,27 +339,37 @@ export default function Assignments() {
               ))}
             </select>
           </div>
+
           <div>
             <label className="field-label">Due date</label>
+
             <input
               type="date"
               className="field-input standalone"
               value={form.dueDate}
-              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, dueDate: e.target.value })
+              }
             />
           </div>
+
           <div>
             <label className="field-label">Assignment PDF</label>
+
             <input
               type="file"
               accept="application/pdf,.pdf"
               required
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              onChange={(e) =>
+                setFile(e.target.files?.[0] || null)
+              }
               className="block w-full rounded-xl border border-slate-200 p-3 text-sm"
             />
           </div>
+
           <div className="md:col-span-2">
             <label className="field-label">Instructions</label>
+
             <textarea
               className="field-input standalone min-h-20"
               value={form.description}
@@ -210,6 +378,7 @@ export default function Assignments() {
               }
             />
           </div>
+
           <div className="md:col-span-2">
             <button disabled={busy} className="btn-primary">
               <UploadCloud size={17} />
@@ -218,11 +387,16 @@ export default function Assignments() {
           </div>
         </form>
       </section>
+
+      {/* Published Assignments */}
       <section>
         <div className="mb-3 flex items-center gap-2">
           <ClipboardList className="text-emerald-700" />
-          <h2 className="font-bold text-slate-900">Published assignments</h2>
+          <h2 className="font-bold text-slate-900">
+            Published assignments
+          </h2>
         </div>
+
         {loading ? (
           <Loading />
         ) : !assignments?.length ? (
@@ -239,34 +413,43 @@ export default function Assignments() {
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
                   <FileText />
                 </span>
+
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-slate-900">{a.title}</h3>
+                  <h3 className="font-semibold text-slate-900">
+                    {a.title}
+                  </h3>
+
                   <p className="mt-1 text-sm text-slate-500">
                     Due: {displayDate(a.dueDate)} · {a.fileName}
                   </p>
+
                   {a.description && (
                     <p className="mt-1 text-sm text-slate-500">
                       {a.description}
                     </p>
                   )}
                 </div>
+
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() =>
                       downloadLearningFile(
                         `/assignments/${a.id}/download`,
-                        a.fileName,
+                        a.fileName
                       )
                     }
                     className="btn-secondary"
                   >
-                    <Download size={16} /> Brief PDF
+                    <Download size={16} />
+                    Brief PDF
                   </button>
+
                   <button
                     onClick={() => openSubmissions(a)}
                     className="btn-primary"
                   >
-                    <Users size={16} /> Review submissions
+                    <Users size={16} />
+                    Review submissions
                   </button>
                 </div>
               </article>
@@ -274,6 +457,8 @@ export default function Assignments() {
           </div>
         )}
       </section>
+
+      {/* Submission Review */}
       {selected && (
         <section className="panel-card overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
@@ -281,14 +466,22 @@ export default function Assignments() {
               <h2 className="font-bold text-slate-900">
                 Submission review · {selected.title}
               </h2>
+
               <p className="text-sm text-slate-500">
-                Download each student's PDF and save POOR / AVG / GOOD marking.
+                Download each student's PDF, check similarity and save POOR / AVG / GOOD marking.
               </p>
             </div>
+
             <div className="flex gap-2">
-              <button onClick={exportPdf} className="btn-secondary">
-                <FileDown size={16} /> Export result PDF
+              {/* Professional Export Button */}
+              <button
+                onClick={exportPdf}
+                className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 font-semibold text-emerald-800 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow-md active:scale-[0.98]"
+              >
+                <FileDown size={17} />
+                Export result PDF
               </button>
+
               <button
                 onClick={() => setSelected(null)}
                 className="icon-button"
@@ -298,6 +491,7 @@ export default function Assignments() {
               </button>
             </div>
           </div>
+
           {tableLoading ? (
             <div className="p-6">
               <Loading />
@@ -308,7 +502,7 @@ export default function Assignments() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1050px] text-left text-sm">
+              <table className="w-full min-w-[1150px] text-left text-sm">
                 <thead className="bg-emerald-50 text-xs uppercase tracking-wide text-emerald-900">
                   <tr>
                     <th className="px-4 py-3">SL</th>
@@ -316,41 +510,63 @@ export default function Assignments() {
                     <th className="px-4 py-3">Student ID</th>
                     <th className="px-4 py-3">Submitted time</th>
                     <th className="px-4 py-3">PDF</th>
+                    <th className="px-4 py-3">Similarity</th>
                     <th className="px-4 py-3">Marking</th>
                     <th className="px-4 py-3">Feedback</th>
                     <th className="px-4 py-3">Action</th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-slate-100">
                   {rows.map((r, i) => (
-                    <tr key={r.submissionId} className="hover:bg-slate-50">
+                    <tr
+                      key={r.submissionId}
+                      className="hover:bg-slate-50"
+                    >
                       <td className="px-4 py-3">{i + 1}</td>
+
                       <td className="px-4 py-3 font-semibold text-slate-800">
                         {r.studentName}
                       </td>
-                      <td className="px-4 py-3">{r.userId || r.studentId}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+
+                      <td className="px-4 py-3">
+                        {r.userId || r.studentId}
+                      </td>
+
+                      <td className="whitespace-nowrap px-4 py-3">
                         {r.submittedAt
                           ? new Date(r.submittedAt).toLocaleString()
                           : "—"}
                       </td>
+
+                      {/* PDF Download */}
                       <td className="px-4 py-3">
                         <button
                           onClick={() =>
                             downloadLearningFile(
                               `/submissions/${r.submissionId}/download`,
-                              r.fileName,
+                              r.fileName
                             )
                           }
-                          className="inline-flex items-center gap-1 font-semibold text-emerald-700"
+                          className="inline-flex items-center gap-1 font-semibold text-emerald-700 transition hover:text-emerald-900"
                         >
-                          <Download size={15} /> PDF
+                          <Download size={15} />
+                          PDF
                         </button>
                       </td>
+
+                      {/* Similarity */}
+                      <td className="px-4 py-3">
+                        {renderSimilarity(r.submissionId)}
+                      </td>
+
+                      {/* Marking */}
                       <td className="px-4 py-3">
                         <select
                           className="field-input standalone min-w-28"
-                          value={gradeDraft[r.submissionId]?.grade || "AVG"}
+                          value={
+                            gradeDraft[r.submissionId]?.grade || "AVG"
+                          }
                           onChange={(e) =>
                             setGradeDraft((v) => ({
                               ...v,
@@ -366,11 +582,15 @@ export default function Assignments() {
                           <option value="GOOD">GOOD</option>
                         </select>
                       </td>
+
+                      {/* Feedback */}
                       <td className="px-4 py-3">
                         <input
                           className="field-input standalone min-w-40"
                           placeholder="Optional feedback"
-                          value={gradeDraft[r.submissionId]?.feedback || ""}
+                          value={
+                            gradeDraft[r.submissionId]?.feedback || ""
+                          }
                           onChange={(e) =>
                             setGradeDraft((v) => ({
                               ...v,
@@ -382,6 +602,8 @@ export default function Assignments() {
                           }
                         />
                       </td>
+
+                      {/* Save Action */}
                       <td className="px-4 py-3">
                         <button
                           disabled={saving === r.submissionId}
@@ -389,7 +611,9 @@ export default function Assignments() {
                           className="btn-primary whitespace-nowrap"
                         >
                           <Save size={15} />
-                          {saving === r.submissionId ? "Saving..." : "Save"}
+                          {saving === r.submissionId
+                            ? "Saving..."
+                            : "Save"}
                         </button>
                       </td>
                     </tr>
