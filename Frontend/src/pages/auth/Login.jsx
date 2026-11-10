@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Brand from "../../components/common/Brand";
+import quizRankLogo from "../../assets/Logo.png";
 import { useAuth } from "../../context/AuthContext";
 import { ErrorBox } from "../../components/common/Feedback";
 
@@ -45,9 +47,11 @@ export default function Login() {
         <section className="relative hidden min-h-[650px] overflow-hidden bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#10b981] p-10 text-white md:flex md:flex-col md:justify-between">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
           <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-violet-300/10" />
+
           <div className="relative">
             <Brand light />
           </div>
+
           <div className="relative">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-indigo-100">
               <Activity size={14} /> Learn. Practice. Compete.
@@ -62,6 +66,7 @@ export default function Login() {
               follow your academic journey.
             </p>
           </div>
+
           <div className="relative flex flex-wrap gap-6 text-sm text-indigo-100">
             <span className="flex items-center gap-2">
               <BookOpen size={17} /> Courses
@@ -74,10 +79,21 @@ export default function Login() {
             </span>
           </div>
         </section>
+
         <section className="p-7 sm:p-10 md:p-12">
           <div className="mb-10 md:hidden">
             <Brand />
           </div>
+
+          {/* QuizRank Logo */}
+          <div className="mb-6 flex justify-center">
+            <img
+              src={quizRankLogo}
+              alt="QuizRank Logo"
+              className="h-20 w-20 object-contain"
+            />
+          </div>
+
           <div className="mb-8">
             <p className="text-sm font-semibold text-[##10b981]">
               WELCOME BACK
@@ -89,7 +105,9 @@ export default function Login() {
               Enter your student or teacher credentials.
             </p>
           </div>
+
           <ErrorBox>{error}</ErrorBox>
+
           <form onSubmit={submit} className="space-y-5">
             <div>
               <label className="field-label" htmlFor="userId">
@@ -108,6 +126,7 @@ export default function Login() {
                 />
               </div>
             </div>
+
             <div>
               <label className="field-label" htmlFor="password">
                 Password
@@ -134,6 +153,7 @@ export default function Login() {
                 </button>
               </div>
             </div>
+
             <label className="flex items-center gap-2 text-sm text-slate-600">
               <input
                 type="checkbox"
@@ -143,6 +163,7 @@ export default function Login() {
               />
               Remember me
             </label>
+
             <button disabled={loading} className="btn-primary w-full py-3.5">
               {loading ? (
                 <LoaderCircle className="animate-spin" size={19} />
@@ -152,14 +173,17 @@ export default function Login() {
               {loading ? "Signing in..." : "Login"}
             </button>
           </form>
+
           <div className="my-7 flex items-center gap-4">
             <span className="h-px flex-1 bg-slate-200" />
             <span className="text-xs text-slate-400">NEW TO QUIZRANK?</span>
             <span className="h-px flex-1 bg-slate-200" />
           </div>
+
           <Link to="/register" className="btn-secondary w-full py-3">
             Create an account
           </Link>
+
           <p className="mt-8 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} QuizRank · Department Quiz Platform
           </p>
