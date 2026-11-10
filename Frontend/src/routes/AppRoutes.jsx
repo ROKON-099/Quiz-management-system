@@ -1,10 +1,10 @@
-
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import AuthLayout from "../layouts/AuthLayout";
 import StudentLayout from "../layouts/StudentLayout";
 import TeacherLayout from "../layouts/TeacherLayout";
+import LeaderboardLayout from "../layouts/LeaderboardLayout";
 
 // Authentication
 import Login from "../pages/auth/Login";
@@ -39,14 +39,25 @@ export default function AppRoutes() {
   return (
     <Routes>
 
-      {/* AUTHENTICATION */}
+      {/* ================= AUTHENTICATION ================= */}
+
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
 
 
-      {/* STUDENT ROUTES */}
+      {/* ================= SHARED PROTECTED ROUTES ================= */}
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/leaderboard" element={<LeaderboardLayout />}>
+          <Route index element={<Leaderboard />} />
+        </Route>
+      </Route>
+
+
+      {/* ================= STUDENT ROUTES ================= */}
+
       <Route element={<ProtectedRoute role="STUDENT" />}>
         <Route path="/student" element={<StudentLayout />}>
 
@@ -100,17 +111,12 @@ export default function AppRoutes() {
             element={<StudentResult />}
           />
 
-          {/* Student Leaderboard */}
-          <Route
-            path="/leaderboard"
-            element={<Leaderboard />}
-          />
-
         </Route>
       </Route>
 
 
-      {/* TEACHER ROUTES */}
+      {/* ================= TEACHER ROUTES ================= */}
+
       <Route element={<ProtectedRoute role="TEACHER" />}>
         <Route path="/teacher" element={<TeacherLayout />}>
 
@@ -139,7 +145,6 @@ export default function AppRoutes() {
             element={<TeacherAssignments />}
           />
 
-          {/* Teacher Plagiarism Check */}
           <Route
             path="plagiarism"
             element={<TeacherPlagiarism />}
@@ -165,23 +170,20 @@ export default function AppRoutes() {
             element={<TeacherProfile />}
           />
 
-          {/* Teacher Leaderboard */}
-          <Route
-            path="/leaderboard"
-            element={<Leaderboard />}
-          />
-
         </Route>
       </Route>
 
 
-      {/* HOME REDIRECT */}
+      {/* ================= HOME REDIRECT ================= */}
+
       <Route
         path="/"
         element={<HomeRedirect />}
       />
 
-      {/* NOT FOUND */}
+
+      {/* ================= NOT FOUND ================= */}
+
       <Route
         path="*"
         element={<Navigate to="/" replace />}
@@ -191,6 +193,8 @@ export default function AppRoutes() {
   );
 }
 
+
+// ================= HOME REDIRECT =================
 
 function HomeRedirect() {
   const raw = localStorage.getItem("quizrank_user");
