@@ -13,7 +13,15 @@ export default function Quiz(){
  useEffect(()=>{let active=true;(async()=>{try{const [q,qs]=await Promise.all([getQuiz(id),getQuizQuestions(id)]);if(!active)return;setQuiz(q);setQuestions(qs||[]);const a=await startAttempt(user?.id||user?.userId,id);if(active)setAttempt(a);}catch(e){if(active)setError(e.message);}finally{if(active)setLoading(false)}})();return()=>{active=false}},[id,user]);
  const current=questions[index]; const selected=answers[index]??"";
  useEffect(()=>{setSeconds(30)},[index]);
- useEffect(()=>{if(loading||!attempt||!current)return;const timer=setInterval(()=>setSeconds(s=>{if(s<=1){clearInterval(timer);goNext(true);return 30}return s-1}),1000);return()=>clearInterval(timer)},[index,loading,attempt,current]);
+ useEffect(()=>{
+  if(loading || !attempt || !current || submitting) return;
+  if(seconds <= 0) {
+    void goNext(true);
+    return;
+  }
+  const timer = setTimeout(() => setSeconds(value => value - 1), 1000);
+  return () => clearTimeout(timer);
+ }, [seconds, index, loading, attempt, current, submitting]);
  const options=useMemo(()=>current?[current.optionA,current.optionB,current.optionC,current.optionD].filter(v=>v!==null&&v!==undefined):[],[current]);
  async function goNext(auto=false){if(submitting||!current)return;setSubmitting(true);try{await submitAnswer(attempt.id,{questionId:current.id,selectedAnswer:answers[index]||null});if(index<questions.length-1)setIndex(v=>v+1);else{const result=await finishAttempt(attempt.id);navigate(`/student/result/${result.id||id}`,{state:{result,quiz}})}}catch(e){setError(e.message)}finally{setSubmitting(false)}}
  async function finish(){if(!window.confirm("Submit your quiz now?"))return;await goNext()}
