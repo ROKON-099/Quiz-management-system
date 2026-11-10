@@ -6,6 +6,7 @@ import {
   ChartNoAxesCombined,
   ClipboardList,
   FileText,
+  ScanSearch,
   NotebookPen,
   LayoutDashboard,
   LogOut,
@@ -27,6 +28,7 @@ const studentLinks = [
   ["My Courses", "/student/my-course", BookOpen],
   ["Course & Study Management", "/student/notice", Bell],
   ["Assignments", "/student/assignments", FileText],
+  ["Similarity Reports", "/student/similarity-reports", ScanSearch],
   ["Leaderboard", "/leaderboard", Trophy],
 ];
 
@@ -36,6 +38,7 @@ const teacherLinks = [
   ["Create Quiz", "/teacher/create-quiz", ClipboardList],
   ["Course & Study Management", "/teacher/notice", BookOpen],
   ["Assignments", "/teacher/assignments", FileText],
+  ["Plagiarism Check", "/teacher/plagiarism", ScanSearch],
   ["Class Notes", "/teacher/class-notes", NotebookPen],
   ["Student Results", "/teacher/results", ChartNoAxesCombined],
 ];
