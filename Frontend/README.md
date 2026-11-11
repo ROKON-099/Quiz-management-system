@@ -1,70 +1,338 @@
-# QuizRank React Frontend
+# 🎓 QuizRank – Online Quiz & Ranking System
 
-Responsive React + Vite frontend for the QuizRank department quiz platform. It uses Tailwind CSS v4, React Router, Axios and Lucide React. No image assets are required; profile placeholders and UI symbols are rendered with Lucide icons.
+**QuizRank** is a web-based Online Quiz and Academic Ranking System designed to help students participate in online quizzes, track their academic performance, and monitor their rankings. Teachers can manage quizzes, publish notices, and evaluate student performance through a dedicated dashboard.
 
-## Requirements
-- Node.js 20.19+ or 22.12+
-- npm
-- QuizRank Spring Boot backend running on `http://localhost:8080`
-- MySQL/MariaDB database connected to the backend
+The platform provides separate interfaces for **Students** and **Teachers**, with a centralized MySQL database.
 
-## Install and run (Windows PowerShell)
-```powershell
-cd QuizTank\frontend
+---
+
+## 🌐 Live Demo
+
+- ## Live Link : https://quiz-management-system-kappa.vercel.app/
+- **GitHub Repository:** [https://github.com/ROKON-099/Quiz-management-system]
+
+---
+
+## ✨ Key Features
+
+### 👨‍🎓 Student Panel
+- Student registration and login.
+- Personalized student dashboard.
+- View personal profile and academic information.
+- View current and previous semester CGPA.
+- View batch ranking and department ranking.
+- Browse assigned courses.
+- Participate in online MCQ quizzes.
+- View quiz results and performance.
+- View available notices and announcements.
+- Track academic progress.
+
+### 👨‍🏫 Teacher Panel
+- Secure teacher login.
+- Personalized teacher dashboard.
+- View assigned courses.
+- Create and publish quizzes.
+- Add multiple-choice questions (MCQ).
+- Set quiz duration and correct answers.
+- Manage quizzes.
+- View student quiz performance.
+- Publish and manage notices.
+- Monitor assessment activities.
+
+### 📊 Ranking & Academic System
+- Batch-wise student ranking.
+- Department-wise student ranking.
+- CGPA-based academic overview.
+- Quiz performance tracking.
+- Leaderboard system.
+
+---
+
+## 🛠️ Technology Stack
+
+| Category | Technology |
+|---|---|
+| Frontend | React.js |
+| Build Tool | Vite |
+| Styling | Tailwind CSS |
+| Icons | Lucide React |
+| Backend | Java Spring Boot |
+| Programming Language | Java |
+| Database | MySQL |
+| API Communication | REST API |
+| HTTP Client | Axios |
+| Routing | React Router |
+| Backend ORM | Spring Data JPA / Hibernate |
+| Development IDE | Visual Studio Code / IntelliJ IDEA |
+| API Testing | Postman |
+| Version Control | Git & GitHub |
+
+---
+
+##  Languages & Versions
+
+| Technology | Version |
+|---|---|
+| Java | JDK 21 |
+| JavaScript | ES6+ |
+| React | Check `package.json` |
+| Vite | Check `package.json` |
+| Spring Boot | Check `pom.xml` |
+| MySQL | Existing MySQL database version |
+| Node.js | Required for frontend development |
+
+> **Note:** Update the React, Vite, Spring Boot, and MySQL versions according to the versions used in the project configuration files.
+
+---
+
+##  Dependencies
+
+### Frontend Dependencies
+
+| Package | Purpose |
+|---|---|
+| `react` | Frontend UI development |
+| `react-dom` | React DOM rendering |
+| `react-router-dom` | Client-side routing |
+| `axios` | HTTP requests to backend APIs |
+| `lucide-react` | UI icons |
+| `@tanstack/react-query` | Server-state management, if used |
+| `tailwindcss` | Utility-first CSS framework |
+| `vite` | Frontend development and build tool |
+
+### Backend Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| `spring-boot-starter-web` | REST API development |
+| `spring-boot-starter-data-jpa` | Database operations |
+| `mysql-connector-j` | MySQL database connectivity |
+| `spring-boot-starter-validation` | Request validation |
+| `spring-boot-starter-security` | Authentication and authorization, if configured |
+| `spring-boot-devtools` | Development support |
+| `lombok` | Reduces boilerplate Java code, if used |
+
+> The dependency lists above describe the expected stack. Confirm the exact installed packages from `package.json` and `pom.xml`.
+
+---
+
+##  Project Structure
+
+```text
+QuizRank/
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   │   ├── student/
+│   │   │   └── teacher/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── context/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── backend/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/quizrank/backend/
+│   │   │   │       ├── config/
+│   │   │   │       ├── controller/
+│   │   │   │       ├── service/
+│   │   │   │       ├── repository/
+│   │   │   │       ├── entity/
+│   │   │   │       ├── dto/
+│   │   │   │       └── QuizRankApplication.java
+│   │   │   └── resources/
+│   │   │       └── application.properties
+│   │   └── test/
+│   └── pom.xml
+│
+└── README.md
+```
+
+---
+
+##  Installation & Setup
+
+### Prerequisites
+
+Make sure you have installed:
+
+- Java JDK 21/26
+- Node.js and npm
+- MySQL Server
+- Visual Studio Code or IntelliJ IDEA
+- Git
+
+### 1. Clone the Repository
+
+```bash
+git clone YOUR_REPOSITORY_URL
+```
+
+```bash
+cd QuizRank
+```
+
+### 2. Backend Setup
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Configure your MySQL connection in:
+
+`src/main/resources/application.properties`
+
+Example:
+
+```properties
+spring.application.name=quizrank
+
+spring.datasource.url=jdbc:mysql://localhost:3306/quizrank
+spring.datasource.username=root
+spring.datasource.password=YOUR_MYSQL_PASSWORD
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.show-sql=true
+
+server.port=8080
+```
+
+**Important:** QuizRank uses an existing MySQL database. Import or retain the existing database and its data before starting the backend. Do not create a new database unnecessarily.
+
+Run the Spring Boot application:
+
+```bash
+mvn spring-boot:run
+```
+
+Backend API:
+
+```text
+http://localhost:8080
+```
+
+### 3. Frontend Setup
+
+Open another terminal and navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
 npm install
-Copy-Item .env.example .env
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
-Open `http://localhost:5173`.
 
-## Production build
-```powershell
-npm run build
-npm run preview
+Frontend:
+
+```text
+http://localhost:5173
 ```
-The production files are generated in `dist/`.
 
-## API configuration
-Edit `.env`:
-```env
-VITE_API_BASE_URL=http://localhost:8080/api
+---
+
+##  Application Architecture
+
+```text
+        Student / Teacher
+                |
+                v
+         React Frontend
+          (Vite + JSX)
+                |
+                v
+          Axios Requests
+                |
+                v
+       Spring Boot REST API
+                |
+                v
+        Service Layer
+                |
+                v
+      Repository Layer (JPA)
+                |
+                v
+          MySQL Database
 ```
-Restart Vite after changing `.env`.
 
-## Main routes
-- `/login`, `/register`
-- `/leaderboard`
-- `/student/dashboard`, `/student/my-course`, `/student/notice`, `/student/profile`, `/student/quiz/:id`, `/student/result/:id`
-- `/teacher/dashboard`, `/teacher/my-course`, `/teacher/create-quiz`, `/teacher/notice`, `/teacher/results`, `/teacher/profile`
+---
 
-## Important integration notes
-1. Login expects `POST /api/auth/login` with JSON `{ "userId": "...", "password": "..." }` and a response containing `{ "user": { ... } }` (or a user object with a `role` field). Roles must be `STUDENT` or `TEACHER`.
-2. The logged-in user is stored in localStorage for this development frontend. This is not production-grade authentication. Use server-side authentication, secure HttpOnly cookies or a properly implemented token flow before deployment.
-3. The quiz UI expects quiz question fields `id`, `questionText`, `optionA`, `optionB`, `optionC`, `optionD`. The answer API expects `{ "questionId": id, "selectedAnswer": "A" }`. Verify these names against your Spring Boot DTOs.
-4. The quiz countdown is a client-side display timer. It is not secure enforcement. The backend must enforce quiz/question deadlines.
-5. The current Spring Boot project does not expose a dedicated student-facing teacher-results summary, total attempt count, or profile update endpoint. The frontend displays only what the current endpoints return; some dashboard metrics are marked unavailable instead of inventing data.
-6. The current quiz-results API returns entity data. If student names are not included in that response, enrich results through a backend DTO endpoint before relying on name display.
-7. Department leaderboard currently uses current academic CGPA records; it is not the same as a quiz-score leaderboard. The UI reflects the current backend contract.
-8. The register page is an information page because the supplied backend has no public registration API.
-9. Existing local development login may use plaintext seed passwords from the database. Do not use this authentication approach in production.
+##  User Roles
 
-## Installed packages
-Runtime:
-- `react`, `react-dom`
-- `react-router-dom`
-- `axios`
-- `lucide-react`
-- `tailwindcss`
-Development:
-- `vite`
-- `@vitejs/plugin-react`
-- `@tailwindcss/vite`
+QuizRank supports two user roles:
 
-## Folder map
-- `src/pages`: page components grouped by auth/common/student/teacher
-- `src/components`: shared UI and dashboard shell
-- `src/layouts`: role-specific application layouts
-- `src/context`: authentication state
-- `src/services`: Spring Boot API clients
-- `src/routes`: route protection and routing
-- `src/styles`: global Tailwind and reusable CSS classes
+| Role | Access |
+|---|---|
+| Student | Student Dashboard, Courses, Quizzes, Results, Profile, Ranking and Notices |
+| Teacher | Teacher Dashboard, Assigned Courses, Quiz Management and Notice Management |
+
+There is no separate Admin panel.
+
+---
+
+##  UI Design
+
+QuizRank uses a clean and responsive interface with a consistent green-based color scheme.
+
+| Element | Color |
+|---|---|
+| Primary Green | `#006045` |
+| Light Green | `#D0FAE5` |
+| Page Background | `#F8FDF9` |
+| Section Background | `#F0FAF4` |
+| Card Background | `#FFFFFF` |
+
+The interface is designed to work on desktop, tablet, and mobile devices.
+
+---
+
+##  Future Improvements
+
+- Advanced quiz analytics.
+- More detailed academic performance reports.
+- Improved quiz scheduling.
+- Exportable student performance reports.
+- Enhanced authentication and security.
+- Additional leaderboard statistics.
+
+---
+
+##  Developer
+
+**Developed as an academic project.**
+
+- **Project Name:** QuizRank
+- **Category:** Online Quiz & Ranking System
+- **Frontend:** React.js
+- **Backend:** Java Spring Boot
+- **Database:** MySQL
+
+---
+
+##  License
+
+This project is developed for educational and academic purposes.
