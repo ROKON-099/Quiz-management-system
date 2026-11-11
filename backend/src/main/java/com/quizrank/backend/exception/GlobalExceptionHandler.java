@@ -10,9 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -52,17 +53,11 @@ public class GlobalExceptionHandler {
                 e.getStatusCode().value()
         );
 
-        log.warn(
-                "HTTP {} error: {}",
-                status.value(),
-                e.getReason()
-        );
+        log.warn("HTTP {} error: {}", status.value(), e.getReason());
 
         return response(
                 status,
-                e.getReason() == null
-                        ? "Request failed"
-                        : e.getReason()
+                e.getReason() == null ? "Request failed" : e.getReason()
         );
     }
 
@@ -75,9 +70,7 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .findFirst()
-                .map(err ->
-                        err.getField() + ": " + err.getDefaultMessage()
-                )
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .orElse("Invalid request data");
 
         log.warn("Validation error: {}", message);
@@ -85,20 +78,54 @@ public class GlobalExceptionHandler {
         return response(HttpStatus.BAD_REQUEST, message);
     }
 
-    // 409 - Database Conflict
+    // 409 - Database Integrity Violation
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> conflict(
             DataIntegrityViolationException e) {
 
-        log.error("Database integrity violation occurred", e);
+        Throwable cause = e.getMostSpecificCause();
+
+        String databaseMessage = cause.getMessage() == null
+                ? ""
+                : cause.getMessage();
+
+        String message = databaseMessage.toLowerCase();
+
+        log.error("Database integrity violation: {}", databaseMessage, e);
+
+        if (message.contains("duplicate entry")
+                || message.contains("unique constraint")) {
+
+            return response(
+                    HttpStatus.CONFLICT,
+                    "This record already exists. Duplicate data is not allowed."
+            );
+        }
+
+        if (message.contains("foreign key constraint")) {
+
+            return response(
+                    HttpStatus.CONFLICT,
+                    "Invalid reference. The selected related record does not exist."
+            );
+        }
+
+        if (message.contains("cannot be null")
+                || message.contains("not null")) {
+
+            return response(
+                    HttpStatus.BAD_REQUEST,
+                    "A required field is missing."
+            );
+        }
 
         return response(
                 HttpStatus.CONFLICT,
-                "This record already exists or violates a database constraint. Check backend logs."
+                "Database constraint violation. Please check the submitted data."
         );
     }
 
-    // 413 - PDF File Size Exceeded
+    // 413 - File Size Exceeded
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> fileSizeExceeded(
             MaxUploadSizeExceededException e) {
@@ -120,7 +147,7 @@ public class GlobalExceptionHandler {
 
         return response(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal server error. Check backend logs."
+                "Internal server error. Please try again later."
         );
     }
 
