@@ -6,16 +6,16 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 
 ---
 
-## 🌐 Live Demo
+##  Live Demo
 
 - ## Live Link : https://quiz-management-system-kappa.vercel.app/
 - **GitHub Repository:** [https://github.com/ROKON-099/Quiz-management-system]
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### 👨‍🎓 Student Panel
+###  Student Panel
 - Student registration and login.
 - Personalized student dashboard.
 - View personal profile and academic information.
@@ -27,7 +27,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 - View available notices and announcements.
 - Track academic progress.
 
-### 👨‍🏫 Teacher Panel
+###  Teacher Panel
 - Secure teacher login.
 - Personalized teacher dashboard.
 - View assigned courses.
@@ -39,7 +39,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 - Publish and manage notices.
 - Monitor assessment activities.
 
-### 📊 Ranking & Academic System
+###  Ranking & Academic System
 - Batch-wise student ranking.
 - Department-wise student ranking.
 - CGPA-based academic overview.
@@ -48,7 +48,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 | Category | Technology |
 |---|---|
