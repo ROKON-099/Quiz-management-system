@@ -1,6 +1,5 @@
-
-
 import { useMemo } from "react";
+
 import {
   BookOpen,
   Bell,
@@ -28,7 +27,6 @@ import { getDepartmentLeaderboard } from "../../services/leaderboardService";
 import { fullName, number } from "../../utils/format";
 
 const GREEN = "#006045";
-const LIGHT_GREEN = "#d0fae5";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -126,7 +124,9 @@ export default function Dashboard() {
     ranking.error;
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen space-y-7 bg-[#f8fdf9] pb-8">
+
+      {/* Page Header */}
       <PageTitle
         title={`Welcome, ${fullName(user)}`}
         subtitle="Your academic overview and learning activities."
@@ -134,184 +134,189 @@ export default function Dashboard() {
 
       <ErrorBox>{error}</ErrorBox>
 
-      {/* ==============================
-          CGPA OVERVIEW
-      ============================== */}
-      <section className="panel-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
-            <GraduationCap size={23} />
-          </div>
+      {/* CGPA Overview */}
+      <section className="rounded-2xl border border-emerald-200 bg-white p-5 sm:p-7">
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#006045]">
-              Academic Performance
-            </p>
+        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
-              Current CGPA
-            </h2>
+          <div className="flex items-center gap-4">
 
-            <p className="mt-1 text-sm text-slate-500">
-              Your cumulative grade point average
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 self-center sm:self-auto">
-          {/* Small CGPA Circle */}
-          <div
-            className="relative grid h-[100px] w-[100px] shrink-0 place-items-center rounded-full"
-            style={{
-              background: `conic-gradient(${GREEN} ${cgpaPercentage}%, #e5e7eb ${cgpaPercentage}%)`,
-            }}
-          >
-            <div className="grid h-[84px] w-[84px] place-items-center rounded-full bg-white">
-              <div className="text-center">
-                <p className="text-2xl font-bold leading-none text-[#006045]">
-                  {academic.loading
-                    ? "..."
-                    : cgpa !== null
-                      ? number(cgpa)
-                      : "—"}
-                </p>
-
-                <p className="mt-1 text-[10px] font-medium text-slate-400">
-                  OUT OF 4.00
-                </p>
-              </div>
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
+              <GraduationCap size={28} />
             </div>
+
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#006045]">
+                Academic Performance
+              </p>
+
+              <h2 className="mt-1 text-xl font-bold text-slate-900">
+                Current CGPA
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Your cumulative grade point average
+              </p>
+            </div>
+
           </div>
 
-          <Link
-            to="/student/profile"
-            className="text-sm font-semibold text-[#006045]"
-          >
-            View Profile
-          </Link>
+          {/* CGPA Circle */}
+          <div className="flex items-center gap-5">
+
+            <div
+              className="relative grid h-28 w-28 shrink-0 place-items-center rounded-full"
+              style={{
+                background: `conic-gradient(${GREEN} ${cgpaPercentage}%, #e5e7eb ${cgpaPercentage}%)`,
+              }}
+            >
+
+              <div className="grid h-[94px] w-[94px] place-items-center rounded-full bg-white">
+
+                <div className="text-center">
+
+                  <p className="text-3xl font-extrabold leading-none text-[#006045]">
+                    {academic.loading
+                      ? "..."
+                      : cgpa !== null
+                        ? number(cgpa)
+                        : "—"}
+                  </p>
+
+                  <p className="mt-2 text-[10px] font-semibold text-slate-400">
+                    OUT OF 4.00
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-700">
+                Your Academic Result
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                {cgpa !== null
+                  ? `${cgpaPercentage.toFixed(1)}% of maximum CGPA`
+                  : "CGPA not available"}
+              </p>
+            </div>
+
+          </div>
+
         </div>
+
       </section>
 
-      {/* ==============================
-          SUMMARY CARDS
-      ============================== */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {/* Courses */}
         <Link
           to="/student/my-course"
-          className="panel-card flex min-h-[116px] items-center gap-4 p-5"
+          className="flex items-center gap-4 rounded-2xl border border-emerald-200 bg-white p-5"
         >
+
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
-            <BookOpen size={22} />
+            <BookOpen size={23} />
           </div>
 
-          <div className="min-w-0">
+          <div>
             <p className="text-sm font-medium text-slate-500">
               My Courses
             </p>
 
-            <p className="mt-1 text-2xl font-bold text-slate-900">
+            <p className="mt-1 text-2xl font-bold text-[#006045]">
               {courses.loading ? "..." : subjectCount}
             </p>
-
-            <p className="mt-1 text-xs text-slate-400">
-              Assigned courses
-            </p>
           </div>
+
         </Link>
 
         {/* Quizzes */}
-        <a
-          href="#available-quizzes"
-          className="panel-card flex min-h-[116px] items-center gap-4 p-5"
-        >
+        <div className="flex items-center gap-4 rounded-2xl border border-emerald-200 bg-white p-5">
+
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
-            <ClipboardCheck size={22} />
+            <ClipboardCheck size={23} />
           </div>
 
-          <div className="min-w-0">
+          <div>
             <p className="text-sm font-medium text-slate-500">
               Available Quizzes
             </p>
 
-            <p className="mt-1 text-2xl font-bold text-slate-900">
+            <p className="mt-1 text-2xl font-bold text-[#006045]">
               {quizzes.loading ? "..." : quizCount}
             </p>
-
-            <p className="mt-1 text-xs text-slate-400">
-              Published quizzes
-            </p>
           </div>
-        </a>
+
+        </div>
 
         {/* Notices */}
-        <a
-          href="#latest-notices"
-          className="panel-card flex min-h-[116px] items-center gap-4 p-5"
-        >
+        <div className="flex items-center gap-4 rounded-2xl border border-emerald-200 bg-white p-5">
+
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
-            <Bell size={22} />
+            <Bell size={23} />
           </div>
 
-          <div className="min-w-0">
+          <div>
             <p className="text-sm font-medium text-slate-500">
               Notices
             </p>
 
-            <p className="mt-1 text-2xl font-bold text-slate-900">
+            <p className="mt-1 text-2xl font-bold text-[#006045]">
               {notices.loading ? "..." : noticeCount}
             </p>
-
-            <p className="mt-1 text-xs text-slate-400">
-              Available announcements
-            </p>
           </div>
-        </a>
+
+        </div>
 
         {/* Batch Ranking */}
-        <div className="panel-card flex min-h-[116px] items-center gap-4 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-emerald-200 bg-white p-5">
+
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
-            <Trophy size={22} />
+            <Trophy size={23} />
           </div>
 
-          <div className="min-w-0">
+          <div>
             <p className="text-sm font-medium text-slate-500">
               Batch Ranking
             </p>
 
-            {ranking.loading ? (
-              <p className="mt-1 text-lg font-semibold text-slate-400">
-                Loading...
-              </p>
-            ) : (
-              <p className="mt-1 text-2xl font-bold text-[#006045]">
-                {currentStudent?.batchRank != null
+            <p className="mt-1 text-2xl font-bold text-[#006045]">
+              {ranking.loading
+                ? "..."
+                : currentStudent?.batchRank != null
                   ? `#${currentStudent.batchRank}`
                   : "—"}
-              </p>
-            )}
-
-            <p className="mt-1 text-xs text-slate-400">
-              Your current batch position
             </p>
           </div>
+
         </div>
+
       </div>
 
-      {/* ==============================
-          QUIZZES & NOTICES
-      ============================== */}
+      {/* Available Quizzes & Latest Notices */}
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
 
         {/* Available Quizzes */}
         <section
           id="available-quizzes"
-          className="panel-card scroll-mt-24 overflow-hidden"
+          className="overflow-hidden rounded-2xl border border-emerald-200 bg-white"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 p-5">
+
+          {/* Header */}
+          <div className="flex items-center gap-3 border-b border-emerald-100 bg-[#f0faf4] p-5">
+
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
+              <ClipboardCheck size={21} />
+            </div>
+
             <div>
-              <h2 className="font-semibold text-slate-900">
+              <h2 className="font-bold text-emerald-950">
                 Available Quizzes
               </h2>
 
@@ -320,85 +325,123 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <Link
-              to="/student/my-course"
-              className="text-sm font-semibold text-[#006045]"
-            >
-              My Courses
-            </Link>
           </div>
 
+          {/* Quiz List */}
           {quizzes.loading ? (
+
             <Loading />
+
           ) : upcoming.length === 0 ? (
-            <EmptyState
-              title="No quizzes available"
-              message="New quizzes will appear here when published."
-            />
+
+            <div className="p-6">
+              <EmptyState
+                title="No quizzes available"
+                message="New quizzes will appear here when published."
+              />
+            </div>
+
           ) : (
-            <div className="divide-y divide-slate-100">
+
+            <div className="divide-y divide-emerald-100">
+
               {upcoming.map((quiz) => (
+
                 <div
                   key={quiz.id}
                   className="flex flex-col justify-between gap-3 p-5 sm:flex-row sm:items-center"
                 >
-                  <div>
-                    <p className="font-semibold text-slate-800">
+
+                  <div className="min-w-0">
+
+                    <h3 className="text-sm font-bold text-slate-900">
                       {quiz.title || quiz.topic || "Course Quiz"}
-                    </p>
+                    </h3>
 
                     <p className="mt-1 text-xs text-slate-500">
                       {quiz.subject?.name ||
                         quiz.subjectName ||
-                        "Course"}{" "}
-                      · {quiz.totalQuestions || 10} questions
+                        "Course"}
                     </p>
+
+                    <p className="mt-2 text-xs text-slate-500">
+                      {quiz.totalQuestions || 10} Questions
+                      <span className="mx-2 text-emerald-300">|</span>
+                      MCQ
+                    </p>
+
                   </div>
 
                   <Link
                     to={`/student/quiz/${quiz.id}`}
-                    className="rounded-lg bg-[#006045] px-4 py-2 text-center text-sm font-semibold text-white"
+                    className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#006045] px-5 py-2.5 text-xs font-semibold text-white"
                   >
                     Start Quiz
                   </Link>
+
                 </div>
+
               ))}
+
             </div>
+
           )}
+
         </section>
 
         {/* Latest Notices */}
         <section
           id="latest-notices"
-          className="panel-card scroll-mt-24 overflow-hidden"
+          className="overflow-hidden rounded-2xl border border-emerald-200 bg-white"
         >
-          <div className="border-b border-slate-100 p-5">
-            <h2 className="font-semibold text-slate-900">
-              Latest Notices
-            </h2>
 
-            <p className="mt-1 text-xs text-slate-500">
-              Updates from your teachers
-            </p>
+          {/* Header */}
+          <div className="flex items-center gap-3 border-b border-emerald-100 bg-[#f0faf4] p-5">
+
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#d0fae5] text-[#006045]">
+              <Bell size={21} />
+            </div>
+
+            <div>
+              <h2 className="font-bold text-emerald-950">
+                Latest Notices
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Updates from your teachers
+              </p>
+            </div>
+
           </div>
 
+          {/* Notice List */}
           {notices.loading ? (
-            <Loading />
-          ) : !notices.data?.length ? (
-            <EmptyState title="No notices yet" />
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {notices.data.slice(0, 4).map((notice) => (
-                <div className="p-4" key={notice.id}>
-                  <p className="font-semibold text-slate-800">
-                    {notice.topic || notice.title}
-                  </p>
 
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+            <Loading />
+
+          ) : !notices.data?.length ? (
+
+            <div className="p-6">
+              <EmptyState title="No notices yet" />
+            </div>
+
+          ) : (
+
+            <div className="divide-y divide-emerald-100">
+
+              {notices.data.slice(0, 4).map((notice) => (
+
+                <div className="p-5" key={notice.id}>
+
+                  <h3 className="text-sm font-bold text-slate-900">
+                    {notice.topic || notice.title}
+                  </h3>
+
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
                     {notice.message}
                   </p>
 
-                  <p className="mt-2 flex items-center gap-1 text-xs text-slate-400">
+                  <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
                     <Clock3 size={13} />
 
                     {notice.createdAt
@@ -407,12 +450,19 @@ export default function Dashboard() {
                         ).toLocaleDateString()
                       : "Notice"}
                   </p>
+
                 </div>
+
               ))}
+
             </div>
+
           )}
+
         </section>
+
       </div>
+
     </div>
   );
 }

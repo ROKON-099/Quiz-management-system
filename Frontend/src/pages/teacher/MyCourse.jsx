@@ -1,5 +1,3 @@
-
-
 import {
   BookOpen,
   Plus,
@@ -63,27 +61,30 @@ export default function MyCourse() {
           />
         </div>
       ) : (
-        <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white">
+        <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm">
 
           {/* Section Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-100 p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-100 bg-[#f1faf5] p-5 sm:p-6">
 
             <div className="flex items-center gap-3">
+
               <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#d0fae5] text-emerald-800">
                 <BookOpen size={21} />
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-emerald-900">
                   Assigned Courses
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Your teaching courses
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Your teaching courses and quiz information
                 </p>
               </div>
+
             </div>
 
-            <span className="rounded-lg bg-[#d0fae5] px-4 py-2 text-xs font-semibold text-emerald-800">
+            <span className="rounded-full bg-[#d0fae5] px-4 py-2 text-sm font-semibold text-emerald-800">
               {courses.length} Total Courses
             </span>
 
@@ -92,20 +93,41 @@ export default function MyCourse() {
           {/* Responsive Table */}
           <div className="overflow-x-auto">
 
-            <table className="w-full min-w-[750px] text-left">
+            <table className="w-full min-w-[950px] text-left">
 
+              {/* Table Header */}
               <thead>
-                <tr className="border-b border-emerald-100 bg-[#f5fcf8] text-xs font-semibold uppercase tracking-wider text-emerald-900">
-                  <th className="px-6 py-4">SL</th>
-                  <th className="px-6 py-4">Course Name</th>
-                  <th className="px-6 py-4">Course Code</th>
-                  <th className="px-6 py-4">Batch</th>
-                  <th className="px-6 py-4">Quizzes</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                <tr className="bg-[#006045] text-xs font-bold uppercase tracking-wide text-white">
+
+                  <th className="border-r border-white/20 px-6 py-5">
+                    Serial
+                  </th>
+
+                  <th className="border-r border-white/20 px-6 py-5">
+                    Course Name
+                  </th>
+
+                  <th className="border-r border-white/20 px-6 py-5">
+                    Course Code
+                  </th>
+
+                  <th className="border-r border-white/20 px-6 py-5 text-center">
+                    Batch
+                  </th>
+
+                  <th className="border-r border-white/20 px-6 py-5 text-center">
+                    Total Quiz
+                  </th>
+
+                  <th className="px-6 py-5 text-center">
+                    Action
+                  </th>
+
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-emerald-50">
+              {/* Table Body */}
+              <tbody className="divide-y divide-emerald-100">
 
                 {courses.map((course, index) => {
 
@@ -116,22 +138,23 @@ export default function MyCourse() {
                   return (
                     <tr
                       key={course.id}
-                      className="transition hover:bg-[#f8fdf9]"
+                      className="bg-[#f8fdf9] transition hover:bg-[#effaf4]"
                     >
 
                       {/* Serial */}
-                      <td className="px-6 py-5">
-                        <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#d0fae5] text-sm font-bold text-emerald-800">
-                          {String(index + 1).padStart(2, "0")}
+                      <td className="border-r border-emerald-100 px-6 py-5">
+                        <span className="text-sm font-medium text-slate-700">
+                          {index + 1}
                         </span>
                       </td>
 
-                      {/* Course */}
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
+                      {/* Course Name */}
+                      <td className="border-r border-emerald-100 px-6 py-5">
 
-                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f1fbf5] text-emerald-700">
-                            <BookOpen size={19} />
+                        <div className="flex items-center gap-4">
+
+                          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#d0fae5] text-emerald-800">
+                            <BookOpen size={22} />
                           </div>
 
                           <div>
@@ -142,55 +165,61 @@ export default function MyCourse() {
                                 "Untitled Course"}
                             </h3>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="mt-1 text-xs text-slate-500">
                               Assigned Course
                             </p>
                           </div>
 
                         </div>
+
                       </td>
 
                       {/* Course Code */}
-                      <td className="px-6 py-5">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#f1fbf5] px-3 py-2 font-mono text-xs font-semibold text-emerald-800">
-                          <Hash size={12} />
+                      <td className="border-r border-emerald-100 px-6 py-5">
+
+                        <span className="inline-flex items-center rounded-lg border border-emerald-200 bg-[#eaf8f0] px-4 py-3 font-mono text-xs font-semibold text-emerald-800">
+                          <Hash size={13} className="mr-1" />
                           {course.courseCode || course.code || "—"}
                         </span>
+
                       </td>
 
                       {/* Batch */}
-                      <td className="px-6 py-5">
-                        <span className="text-sm text-slate-600">
+                      <td className="border-r border-emerald-100 px-6 py-5 text-center">
+
+                        <span className="inline-flex items-center rounded-full bg-[#d0fae5] px-4 py-2 text-sm font-semibold text-emerald-800">
                           {course.batch || "—"}
                         </span>
+
                       </td>
 
-                      {/* Quiz Count */}
-                      <td className="px-6 py-5">
-                        <div className="inline-flex items-center gap-2 rounded-lg bg-[#f1fbf5] px-3 py-2">
-                          <ClipboardList
-                            size={16}
-                            className="text-emerald-700"
-                          />
+                      {/* Total Quiz */}
+                      <td className="border-r border-emerald-100 px-6 py-5 text-center">
 
-                          <span className="text-sm font-semibold text-slate-800">
-                            {count}
-                          </span>
-                        </div>
+                        <span className="inline-flex h-10 min-w-12 items-center justify-center gap-1 rounded-full bg-[#d0fae5] px-4 text-sm font-bold text-emerald-800">
+
+                          <ClipboardList size={15} />
+
+                          {count}
+
+                        </span>
+
                       </td>
 
                       {/* Action */}
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-6 py-5 text-center">
+
                         <Link
                           to="/teacher/create-quiz"
                           state={{
                             subjectId: course.id || course.subjectId,
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2.5 text-xs font-semibold text-emerald-800 transition hover:bg-[#d0fae5]"
+                          className="inline-flex items-center gap-2 rounded-lg bg-[#006045] px-4 py-3 text-xs font-semibold text-white transition hover:bg-[#004d38]"
                         >
-                          <Plus size={14} />
+                          <Plus size={15} />
                           Create Quiz
                         </Link>
+
                       </td>
 
                     </tr>
@@ -204,10 +233,13 @@ export default function MyCourse() {
           </div>
 
           {/* Table Footer */}
-          <div className="flex items-center justify-between gap-3 border-t border-emerald-100 bg-[#f8fdf9] px-5 py-4">
+          <div className="flex items-center justify-between gap-3 border-t border-emerald-100 bg-[#f1faf5] px-5 py-4">
 
             <span className="text-xs text-slate-500">
-              <BookOpen size={14} className="mr-1 inline text-emerald-700" />
+              <BookOpen
+                size={14}
+                className="mr-1 inline text-emerald-700"
+              />
               Course Management
             </span>
 
