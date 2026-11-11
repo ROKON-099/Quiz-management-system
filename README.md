@@ -1,4 +1,4 @@
-# 🎓 QuizRank – Online Quiz & Ranking System
+#  QuizRank – Online Quiz & Ranking System
 
 **QuizRank** is a web-based Online Quiz and Academic Ranking System designed to help students participate in online quizzes, track their academic performance, and monitor their rankings. Teachers can manage quizzes, publish notices, and evaluate student performance through a dedicated dashboard.
 
@@ -6,16 +6,21 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 
 ---
 
-## 🌐 Live Demo
+##  Live Demo
 
 - ## Live Link : https://quiz-management-system-kappa.vercel.app/
 - **GitHub Repository:** [https://github.com/ROKON-099/Quiz-management-system]
+- Student ID:CSE[001-002,003,004,005.........]
+- Pass: 123456;
+- Teacher ID :T001-004;
+- Pass:123456
+  
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### 👨‍🎓 Student Panel
+###  Student Panel
 - Student registration and login.
 - Personalized student dashboard.
 - View personal profile and academic information.
@@ -27,7 +32,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 - View available notices and announcements.
 - Track academic progress.
 
-### 👨‍🏫 Teacher Panel
+###  Teacher Panel
 - Secure teacher login.
 - Personalized teacher dashboard.
 - View assigned courses.
@@ -39,7 +44,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 - Publish and manage notices.
 - Monitor assessment activities.
 
-### 📊 Ranking & Academic System
+###  Ranking & Academic System
 - Batch-wise student ranking.
 - Department-wise student ranking.
 - CGPA-based academic overview.
