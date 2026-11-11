@@ -17,7 +17,7 @@ The platform provides separate interfaces for **Students** and **Teachers**, wit
 ![Teacher Dashboard](Screenshot/teacher-dashboard.png)
 
 ###  My Courses
-![My Courses](Screenshot/my-courses.png)
+![My Courses](Screenshot/My-Courses.png)
 
 ###  Leaderboard
 ![Leaderboard](Screenshot/leaderboard.png)
