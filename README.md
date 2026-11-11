@@ -4,6 +4,29 @@
 
 The platform provides separate interfaces for **Students** and **Teachers**, with a centralized MySQL database.
 
+
+##  Project Screenshots
+
+###  Login Page
+![Login Page](Screenshot/login.png)
+
+###  Student Dashboard
+![Student Dashboard](Screenshot/student-dashboard.png)
+
+###  Teacher Dashboard
+![Teacher Dashboard](Screenshot/teacher-dashboard.png)
+
+###  My Courses
+![My Courses](Screenshot/my-courses.png)
+
+###  Leaderboard
+![Leaderboard](Screenshot/leaderboard.png)
+
+
+
+
+
+
 ---
 
 ##  Live Demo
